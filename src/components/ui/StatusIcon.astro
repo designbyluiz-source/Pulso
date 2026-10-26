@@ -1,0 +1,44 @@
+---
+/**
+ * Formas distintas por status (círculo/check, triângulo/!, octógono/x)
+ * para que o estado nunca dependa só da cor.
+ */
+export type Status = 'up' | 'degraded' | 'down';
+interface Props { status: Status; size?: number; }
+const { status, size = 16 } = Astro.props;
+---
+<svg
+  class={`status-icon status-icon--${status}`}
+  width={size}
+  height={size}
+  viewBox="0 0 16 16"
+  fill="none"
+  aria-hidden="true"
+>
+  {status === 'up' && (
+    <>
+      <circle cx="8" cy="8" r="7" fill="currentColor" />
+      <path d="M4.8 8.2l2.1 2.1 4.3-4.6" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    </>
+  )}
+  {status === 'degraded' && (
+    <>
+      <path d="M8 1.3l7 12.6H1L8 1.3z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round" />
+      <path d="M8 5.8v3.8" stroke="#000" stroke-width="1.8" stroke-linecap="round" />
+      <circle cx="8" cy="11.8" r="1" fill="#000" />
+    </>
+  )}
+  {status === 'down' && (
+    <>
+      <path d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1L5.1 1z" fill="currentColor" />
+      <path d="M5.6 5.6l4.8 4.8M10.4 5.6l-4.8 4.8" stroke="#000" stroke-width="1.8" stroke-linecap="round" />
+    </>
+  )}
+</svg>
+
+<style>
+  .status-icon { flex: none; }
+  .status-icon--up { color: var(--status-up); }
+  .status-icon--degraded { color: var(--status-degraded); }
+  .status-icon--down { color: var(--status-down); }
+</style>

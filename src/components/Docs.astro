@@ -1,0 +1,155 @@
+---
+import { sdkSnippets, otelSnippet } from '../data/content';
+---
+<section id="docs" class="section docs" aria-labelledby="docs-title">
+  <div class="container docs__grid">
+    <div class="docs__copy">
+      <p class="t-label">Documentação</p>
+      <h2 id="docs-title" class="t-heading-lg">Cinco linhas para começar a ver os erros.</h2>
+      <p class="t-lead">
+        Cada recurso tem guia passo a passo, referência de API e exemplo copiável. A documentação é parte do
+        produto: se um passo não está claro, tratamos como bug.
+      </p>
+      <ul class="docs__links">
+        <li><a href="/docs/inicio-rapido">Início rápido<span>Primeiro monitor e primeiro alerta</span></a></li>
+        <li><a href="/docs/opentelemetry">OpenTelemetry<span>Enviar logs, métricas e traces</span></a></li>
+        <li><a href="/docs/api">API REST<span>Criar monitores via código e CI</span></a></li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code__tabs" role="tablist" aria-label="Linguagem do SDK">
+        {sdkSnippets.map((s, i) => (
+          <button
+            role="tab"
+            type="button"
+            id={`tab-${s.id}`}
+            aria-controls={`panel-${s.id}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {sdkSnippets.map((s, i) => (
+        <div
+          role="tabpanel"
+          id={`panel-${s.id}`}
+          aria-labelledby={`tab-${s.id}`}
+          hidden={i !== 0}
+          class="code__panel"
+          tabindex="0"
+        >
+          <div class="code__install">
+            <code><span aria-hidden="true" class="t-muted">$ </span>{s.install}</code>
+            <button type="button" class="code__copy" data-copy={s.install}>Copiar</button>
+          </div>
+          <div class="code__file">{s.file}</div>
+          <pre><code>{s.code}</code></pre>
+        </div>
+      ))}
+
+      <div class="code__otel">
+        <div class="code__file">.env</div>
+        <pre><code>{otelSnippet}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Abas acessíveis (setas, Home/End) + botão copiar
+  document.querySelectorAll<HTMLElement>('.code').forEach((root) => {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const select = (tab: HTMLButtonElement, focus = true) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(t.getAttribute('aria-controls')!);
+        if (panel) panel.hidden = !on;
+      });
+      if (focus) tab.focus();
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab, false));
+      tab.addEventListener('keydown', (e) => {
+        const map: Record<string, number> = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 };
+        if (e.key in map) {
+          e.preventDefault();
+          select(tabs[(map[e.key] + tabs.length) % tabs.length]);
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy ?? '');
+        btn.textContent = 'Copiado';
+        setTimeout(() => (btn.textContent = 'Copiar'), 1600);
+      } catch {
+        btn.textContent = 'Selecione e copie';
+      }
+    });
+  });
+</script>
+
+<style>
+  .docs__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(36px, 6vw, 96px);
+    align-items: start;
+  }
+  .docs__copy { display: flex; flex-direction: column; gap: var(--spacing-24); position: sticky; top: 110px; }
+  .docs__links { display: flex; flex-direction: column; margin-top: var(--spacing-12); }
+  .docs__links a {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 16px 0; border-top: 1px solid var(--line);
+    font-size: 20px; font-weight: 400; letter-spacing: -0.01em;
+    transition: color 0.15s ease;
+  }
+  .docs__links li:last-child a { border-bottom: 1px solid var(--line); }
+  .docs__links a span { font-size: 15px; font-weight: 300; color: var(--color-ash-gray); }
+  .docs__links a:hover { color: var(--color-saffron-spark); }
+
+  .code {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-3xl);
+    background: var(--surface-1);
+    overflow: hidden;
+    font-weight: 400;
+  }
+  .code__tabs { display: flex; gap: 4px; padding: 10px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .code__tabs [role='tab'] {
+    min-height: 40px; padding: 0 16px; border: 0; border-radius: var(--radius-full);
+    background: none; color: var(--color-ash-gray); font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+  .code__tabs [role='tab'][aria-selected='true'] { background: var(--surface-2); color: var(--color-bone-white); }
+  .code__tabs [role='tab']:hover { color: var(--color-bone-white); }
+
+  .code__panel:focus-visible { outline-offset: -4px; }
+  .code__install {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    margin: 18px 18px 0; padding: 8px 8px 8px 14px; border: 1px solid var(--line); border-radius: 12px;
+    font-size: 13.5px; overflow-x: auto;
+  }
+  .code__install code { white-space: nowrap; }
+  .code__copy {
+    min-height: 36px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-full);
+    background: none; font-size: 13px; cursor: pointer; flex: none;
+  }
+  .code__copy:hover { border-color: var(--color-bone-white); }
+  .code__file { padding: 18px 18px 0; font-family: var(--font-mono); font-size: 12px; color: var(--color-ash-gray); }
+  .code pre { margin: 0; padding: 12px 18px 22px; overflow-x: auto; font-size: 13.5px; line-height: 1.7; color: #e8e8ea; tab-size: 2; }
+  .code__otel { border-top: 1px solid var(--line); background: #060608; }
+
+  @media (max-width: 960px) {
+    .docs__grid { grid-template-columns: 1fr; }
+    .docs__copy { position: static; }
+  }
+</style>

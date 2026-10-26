@@ -1,0 +1,49 @@
+---
+import Logo from './ui/Logo.astro';
+import StatusIcon from './ui/StatusIcon.astro';
+
+const cols = [
+  { title: 'Produto', links: [['Monitoramento', '#recursos'], ['Alertas e plantão', '#recursos'], ['Logs e métricas', '#recursos'], ['Preços', '#precos']] },
+  { title: 'Desenvolvedores', links: [['Documentação', '/docs'], ['API REST', '/docs/api'], ['OpenTelemetry', '/docs/opentelemetry'], ['Changelog', '/changelog']] },
+  { title: 'Empresa', links: [['Sobre', '/sobre'], ['Contato', '/contato'], ['Termos de uso', '/termos'], ['Privacidade e LGPD', '/privacidade']] },
+];
+---
+<footer class="footer">
+  <div class="container footer__grid">
+    <div class="footer__brand">
+      <Logo />
+      <a href="https://status.pulso.dev" class="footer__status">
+        <StatusIcon status="up" size={14} />
+        <span>Todos os sistemas operacionais</span>
+      </a>
+    </div>
+    {cols.map((c) => (
+      <nav aria-label={c.title}>
+        <h2 class="footer__title">{c.title}</h2>
+        <ul>
+          {c.links.map(([label, href]) => (
+            <li><a href={href}>{label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    ))}
+  </div>
+  <div class="container footer__bottom">
+    <span>© {new Date().getFullYear()} Pulso</span>
+    <span>[Razão social e CNPJ]</span>
+  </div>
+</footer>
+
+<style>
+  .footer { border-top: 1px solid var(--line); padding: var(--spacing-60) 0 calc(var(--spacing-36) + env(safe-area-inset-bottom, 0px)); font-weight: 400; }
+  .footer__grid { display: grid; grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); gap: var(--spacing-36); }
+  .footer__brand { display: flex; flex-direction: column; gap: var(--spacing-18); align-items: flex-start; }
+  .footer__status { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; color: var(--color-silver-mist); }
+  .footer__status:hover { color: var(--color-bone-white); }
+  .footer__title { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+  .footer ul { display: flex; flex-direction: column; }
+  .footer ul a { display: inline-flex; align-items: center; min-height: 36px; font-size: 14px; color: var(--color-ash-gray); }
+  .footer ul a:hover { color: var(--color-bone-white); }
+  .footer__bottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: var(--spacing-60); font-size: 13px; color: var(--color-ash-gray); }
+  @media (max-width: 860px) { .footer__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .footer__brand { grid-column: 1 / -1; } }
+</style>

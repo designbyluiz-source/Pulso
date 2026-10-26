@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Dashboard from '../components/Dashboard.astro';
+import Setup from '../components/Setup.astro';
+import Features from '../components/Features.astro';
+import Docs from '../components/Docs.astro';
+import Audience from '../components/Audience.astro';
+import Pricing from '../components/Pricing.astro';
+import Faq from '../components/Faq.astro';
+import FinalCta from '../components/FinalCta.astro';
+import Footer from '../components/Footer.astro';
+---
+<Base
+  title="Pulso: monitoramento, alertas e página de status para desenvolvedores"
+  description="Monitore URLs de São Paulo, EUA e Europa, receba alertas no Slack, WhatsApp ou telefone, investigue logs e erros e mantenha uma página de status pública. Grátis para 10 monitores."
+>
+  <Nav />
+  <main id="conteudo">
+    <Hero />
+    <Dashboard />
+    <Setup />
+    <Features />
+    <Docs />
+    <Audience />
+    <Pricing />
+    <Faq />
+    <FinalCta />
+  </main>
+  <Footer />
+</Base>

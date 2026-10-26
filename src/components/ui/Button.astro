@@ -1,0 +1,47 @@
+---
+/**
+ * primary: pílula Iris — uma por vista.
+ * ghost: texto com sublinhado no hover.
+ * outline: ações secundárias em blocos (planos).
+ */
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'ghost' | 'outline';
+  type?: 'button' | 'submit';
+  class?: string;
+}
+const { href, variant = 'primary', type = 'button', class: className } = Astro.props;
+const Tag = href ? 'a' : 'button';
+---
+<Tag
+  href={href}
+  type={href ? undefined : type}
+  class:list={['btn', `btn--${variant}`, className]}
+>
+  <slot />
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 12px 22px;
+    border-radius: var(--radius-3xl);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .btn--primary { background: var(--color-electric-iris); color: var(--color-bone-white); }
+  .btn--primary:hover { background: #6d3df5; }
+  .btn--ghost { padding-inline: 4px; color: var(--color-bone-white); background: none; }
+  .btn--ghost:hover { text-decoration: underline; text-underline-offset: 6px; }
+  .btn--outline { border-color: var(--line-strong); color: var(--color-bone-white); background: none; }
+  .btn--outline:hover { border-color: var(--color-bone-white); }
+</style>

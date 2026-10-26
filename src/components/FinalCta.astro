@@ -1,0 +1,28 @@
+---
+---
+<section class="section final" aria-labelledby="final-title">
+  <div class="container final__inner">
+    <h2 id="final-title" class="t-display final__title">Cole uma URL. O primeiro alerta chega antes do café esfriar.</h2>
+    <div class="final__actions">
+      <a href="/cadastro" class="final__cta">Criar conta grátis</a>
+      <a href="/docs/inicio-rapido" class="final__ghost">Ler o início rápido</a>
+    </div>
+    <p class="t-muted final__note">10 monitores grátis para sempre, sem cartão de crédito.</p>
+  </div>
+</section>
+
+<style>
+  .final { border-top: 1px solid var(--line); }
+  .final__inner { display: flex; flex-direction: column; gap: var(--spacing-36); }
+  .final__title { max-width: 16ch; font-size: clamp(44px, 6.6vw, 96px); }
+  .final__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-24); }
+  .final__cta {
+    display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px;
+    border-radius: var(--radius-3xl); background: var(--color-electric-iris);
+    font-size: 16px; font-weight: 500; transition: background-color 0.15s ease;
+  }
+  .final__cta:hover { background: #6d3df5; }
+  .final__ghost { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 400; text-underline-offset: 6px; }
+  .final__ghost:hover { text-decoration: underline; color: var(--color-saffron-spark); }
+  .final__note { font-size: 15px; font-weight: 400; }
+</style>

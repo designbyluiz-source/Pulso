@@ -1,0 +1,121 @@
+---
+import Logo from './ui/Logo.astro';
+
+const links = [
+  { href: '#produto', label: 'Produto' },
+  { href: '#recursos', label: 'Recursos' },
+  { href: '#docs', label: 'Documentação' },
+  { href: '#precos', label: 'Preços' },
+];
+---
+<header class="nav">
+  <div class="container nav__inner">
+    <Logo />
+
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+      <span class="visually-hidden">Abrir menu</span>
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+        <path d="M3 7h16M3 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <nav id="nav-menu" class="nav__menu" aria-label="Principal">
+      <ul class="nav__links">
+        {links.map((l) => (
+          <li><a href={l.href}>{l.label}</a></li>
+        ))}
+      </ul>
+      <div class="nav__actions">
+        <a href="/entrar" class="nav__signin">Entrar</a>
+        <a href="/cadastro" class="nav__signup">Criar conta</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.nav__toggle');
+  const menu = document.getElementById('nav-menu');
+  if (toggle && menu) {
+    const label = toggle.querySelector('.visually-hidden');
+    const set = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.dataset.open = String(open);
+      if (label) label.textContent = open ? 'Fechar menu' : 'Abrir menu';
+    };
+    toggle.addEventListener('click', () => set(toggle.getAttribute('aria-expanded') !== 'true'));
+    menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => set(false)));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') set(false); });
+  }
+</script>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid transparent;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 72px;
+  }
+  .nav__menu { display: flex; align-items: center; gap: 36px; }
+  .nav__links { display: flex; gap: 30px; }
+  .nav__links a,
+  .nav__signin {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--text-nav-label);
+    font-weight: 500;
+    color: var(--color-ash-gray);
+    transition: color 0.15s ease;
+  }
+  .nav__links a:hover, .nav__signin:hover { color: var(--color-bone-white); }
+  .nav__actions { display: flex; align-items: center; gap: 24px; }
+  .nav__signup {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line-strong);
+    font-size: var(--text-nav-label);
+    font-weight: 500;
+    transition: border-color 0.15s ease;
+  }
+  .nav__signup:hover { border-color: var(--color-bone-white); }
+  .nav__toggle {
+    display: none;
+    width: 44px; height: 44px;
+    align-items: center; justify-content: center;
+    background: none; border: 0; cursor: pointer;
+  }
+
+  @media (max-width: 880px) {
+    .nav__toggle { display: inline-flex; }
+    .nav__menu {
+      position: absolute;
+      inset: 72px 0 auto 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      padding: 12px var(--gutter) 24px;
+      background: var(--color-void);
+      border-bottom: 1px solid var(--line);
+      display: none;
+    }
+    .nav__menu[data-open='true'] { display: flex; }
+    .nav__links { flex-direction: column; gap: 0; }
+    .nav__links a { font-size: 18px; color: var(--color-bone-white); min-height: 52px; }
+    .nav__actions { justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--line); }
+  }
+</style>

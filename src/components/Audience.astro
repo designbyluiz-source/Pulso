@@ -1,0 +1,51 @@
+---
+const groups = [
+  {
+    title: 'Para quem desenvolve',
+    points: [
+      ['Configura em minutos', 'Cola a URL, escolhe o canal, recebe o teste. O resto tem padrão sensato.'],
+      ['Investiga sem trocar de aba', 'Do alerta ao log e ao stack trace do mesmo instante, com um clique.'],
+      ['Usa o que já tem', 'OpenTelemetry, SDK em JavaScript, Python e PHP, API REST para automatizar.'],
+    ],
+  },
+  {
+    title: 'Para o time de tecnologia',
+    points: [
+      ['Plantão que não esgota', 'Menos falso positivo, escalas justas e escalonamento automático.'],
+      ['Histórico de cada incidente', 'Linha do tempo com detecção, confirmação, alertas e quem reconheceu.'],
+      ['Comunicação com o cliente', 'Página de status pública que segue no ar mesmo com a plataforma fora.'],
+    ],
+  },
+];
+---
+<section class="section audience" aria-labelledby="aud-title">
+  <div class="container">
+    <h2 id="aud-title" class="visually-hidden">Benefícios para desenvolvedores e times</h2>
+    <div class="aud">
+      {groups.map((g) => (
+        <div class="aud__col">
+          <h3 class="t-heading">{g.title}</h3>
+          <dl>
+            {g.points.map(([t, d]) => (
+              <div class="aud__item">
+                <dt>{t}</dt>
+                <dd>{d}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .aud { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(36px, 6vw, 96px); }
+  .aud__col { display: flex; flex-direction: column; gap: var(--spacing-36); }
+  .aud dl { margin: 0; display: flex; flex-direction: column; }
+  .aud__item { padding: var(--spacing-18) 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--spacing-18); }
+  .aud__item dt { font-weight: 400; }
+  .aud__item dd { margin: 0; color: var(--color-silver-mist); }
+  @media (max-width: 960px) { .aud { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .aud__item { grid-template-columns: 1fr; gap: 4px; } }
+</style>
