@@ -3,7 +3,7 @@ import Logo from './ui/Logo.astro';
 
 const links = [
   { href: '#produto', label: 'Produto' },
-  { href: '#recursos', label: 'Recursos' },
+  { href: '#plataforma', label: 'Recursos' },
   { href: '#docs', label: 'Documentação' },
   { href: '#precos', label: 'Preços' },
 ];
@@ -12,24 +12,24 @@ const links = [
   <div class="container nav__inner">
     <Logo />
 
-    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
-      <span class="visually-hidden">Abrir menu</span>
-      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
-        <path d="M3 7h16M3 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-      </svg>
-    </button>
-
     <nav id="nav-menu" class="nav__menu" aria-label="Principal">
       <ul class="nav__links">
         {links.map((l) => (
-          <li><a href={l.href}>{l.label}</a></li>
+          <li><a href={l.href} class="nav__pill">{l.label}</a></li>
         ))}
       </ul>
       <div class="nav__actions">
         <a href="/entrar" class="nav__signin">Entrar</a>
-        <a href="/cadastro" class="nav__signup">Criar conta</a>
+        <a href="/cadastro" class="btn btn--primary nav__cta">Começar grátis</a>
       </div>
     </nav>
+
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+      <span class="visually-hidden">Abrir menu</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+        <path d="M3 7h14M3 13h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
+    </button>
   </div>
 </header>
 
@@ -54,10 +54,10 @@ const links = [
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(0, 0, 0, 0.82);
-    backdrop-filter: saturate(140%) blur(10px);
-    -webkit-backdrop-filter: saturate(140%) blur(10px);
-    border-bottom: 1px solid transparent;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-iron);
     padding-top: env(safe-area-inset-top, 0px);
   }
   .nav__inner {
@@ -65,57 +65,59 @@ const links = [
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    min-height: 72px;
+    min-height: 64px;
   }
-  .nav__menu { display: flex; align-items: center; gap: 36px; }
-  .nav__links { display: flex; gap: 30px; }
-  .nav__links a,
+  .nav__menu { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 24px; margin-left: 32px; }
+  .nav__links { display: flex; gap: 2px; }
+  .nav__pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 8px 14px;
+    border-radius: var(--radius-navpills);
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--color-bone);
+    transition: background-color 0.15s ease;
+  }
+  .nav__pill:hover { background: var(--color-iron); }
+  .nav__actions { display: flex; align-items: center; gap: 16px; }
   .nav__signin {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-    font-size: var(--text-nav-label);
+    font-size: var(--text-body-sm);
     font-weight: 500;
-    color: var(--color-ash-gray);
-    transition: color 0.15s ease;
+    letter-spacing: 0;
+    color: var(--color-ash);
   }
-  .nav__links a:hover, .nav__signin:hover { color: var(--color-bone-white); }
-  .nav__actions { display: flex; align-items: center; gap: 24px; }
-  .nav__signup {
-    display: inline-flex;
-    align-items: center;
-    min-height: 40px;
-    padding: 0 18px;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--line-strong);
-    font-size: var(--text-nav-label);
-    font-weight: 500;
-    transition: border-color 0.15s ease;
-  }
-  .nav__signup:hover { border-color: var(--color-bone-white); }
+  .nav__signin:hover { color: var(--color-bone); }
+  .nav__cta { min-height: 36px; padding: 8px 16px; }
   .nav__toggle {
     display: none;
     width: 44px; height: 44px;
     align-items: center; justify-content: center;
-    background: none; border: 0; cursor: pointer;
+    background: none; border: 1px solid var(--color-iron); border-radius: var(--radius-buttons); cursor: pointer;
   }
 
-  @media (max-width: 880px) {
+  @media (max-width: 860px) {
     .nav__toggle { display: inline-flex; }
     .nav__menu {
       position: absolute;
-      inset: 72px 0 auto 0;
+      inset: 64px 0 auto 0;
+      margin: 0;
       flex-direction: column;
       align-items: stretch;
-      gap: 12px;
-      padding: 12px var(--gutter) 24px;
-      background: var(--color-void);
-      border-bottom: 1px solid var(--line);
+      gap: 16px;
+      padding: 16px var(--gutter) 24px;
+      background: var(--surface-canvas);
+      border-bottom: 1px solid var(--color-iron);
       display: none;
     }
     .nav__menu[data-open='true'] { display: flex; }
-    .nav__links { flex-direction: column; gap: 0; }
-    .nav__links a { font-size: 18px; color: var(--color-bone-white); min-height: 52px; }
-    .nav__actions { justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--line); }
+    .nav__links { flex-direction: column; }
+    .nav__pill { min-height: 48px; font-size: var(--text-body); border-radius: var(--radius-buttons); }
+    .nav__actions { justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--color-iron); }
   }
 </style>

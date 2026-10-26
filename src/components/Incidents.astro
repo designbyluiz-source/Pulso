@@ -1,0 +1,82 @@
+---
+import TimelineMarker from './ui/TimelineMarker.astro';
+import StatusBadge from './ui/StatusBadge.astro';
+import { incident } from '../data/content';
+
+const kindLabel = { detect: 'Detecção', confirm: 'Confirmação', alert: 'Alerta', ack: 'Reconhecido', resolve: 'Resolvido' } as const;
+---
+<section class="section incidents" aria-labelledby="inc-title">
+  <div class="container inc">
+    <div class="inc__copy">
+      <p class="t-eyebrow">Incidentes</p>
+      <h2 id="inc-title" class="t-heading-lg">Cada minuto do incidente fica registrado, do primeiro 503 à correção.</h2>
+      <p class="t-body">
+        A linha do tempo junta detecção, confirmação entre regiões, alertas enviados, quem reconheceu e quando
+        resolveu. Serve para o post-mortem e para quem chega no meio da madrugada entender o que já foi feito.
+      </p>
+
+      <div class="legend-a11y">
+        <p class="t-eyebrow">Como ler os status</p>
+        <ul>
+          <li><StatusBadge status="up" /><span>Respondendo dentro do esperado</span></li>
+          <li><StatusBadge status="degraded" /><span>No ar, mas acima do limite de latência</span></li>
+          <li><StatusBadge status="down" /><span>Queda confirmada por mais de uma região</span></li>
+        </ul>
+        <p class="t-body-sm">Cada estado tem forma própria (círculo, triângulo, octógono) além da cor e do texto. Na linha do tempo, alertas aparecem com um sino e reconhecimentos com um olho.</p>
+      </div>
+    </div>
+
+    <div class="inc__card card">
+      <div class="inc__head">
+        <div>
+          <span class="t-eyebrow">INC-0142</span>
+          <h3 class="t-heading-sm">{incident.title}</h3>
+        </div>
+        <StatusBadge status="up" label="Resolvido em 19 min" />
+      </div>
+      <ol class="tl">
+        {incident.events.map((e) => (
+          <li class="tl__item">
+            <span class="tl__dot"><TimelineMarker kind={e.kind} size={14} /></span>
+            <div class="tl__body">
+              <div class="tl__meta">
+                <span class="tl__time">{e.time}</span>
+                <span class="tag">{kindLabel[e.kind]}</span>
+              </div>
+              <span class="tl__what">{e.title}</span>
+              <span class="tl__detail">{e.detail}</span>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .inc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .inc__copy { display: flex; flex-direction: column; gap: var(--spacing-24); }
+  .inc__copy > .t-body { max-width: 52ch; }
+
+  .legend-a11y { display: flex; flex-direction: column; gap: 16px; margin-top: var(--spacing-16); padding-top: var(--spacing-24); border-top: 1px solid var(--color-iron); }
+  .legend-a11y ul { display: flex; flex-direction: column; gap: 12px; }
+  .legend-a11y li { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 12px; font-size: var(--text-body-sm); color: var(--color-ash); }
+  .legend-a11y li > :global(.badge) { justify-self: start; }
+
+  .inc__card { padding: var(--card-padding); }
+  .inc__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding-bottom: var(--spacing-24); margin-bottom: var(--spacing-24); border-bottom: 1px solid var(--color-iron); }
+  .inc__head h3 { margin-top: 8px; }
+
+  .tl { position: relative; display: flex; flex-direction: column; gap: 20px; }
+  .tl::before { content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 1px; background: var(--color-slate-edge); }
+  .tl__item { position: relative; display: grid; grid-template-columns: 24px 1fr; gap: 14px; }
+  .tl__dot { width: 24px; height: 24px; display: grid; place-items: center; background: var(--color-graphite); }
+  .tl__body { display: flex; flex-direction: column; gap: 2px; }
+  .tl__meta { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .tl__time { font-family: var(--font-mono); font-size: 12px; color: var(--color-ash); }
+  .tl__what { font-weight: 500; }
+  .tl__detail { font-size: var(--text-body-sm); color: var(--color-ash); }
+
+  @media (max-width: 960px) { .inc { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) { .legend-a11y li { grid-template-columns: 1fr; gap: 6px; } }
+</style>

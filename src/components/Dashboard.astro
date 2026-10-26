@@ -1,312 +1,292 @@
 ---
 import StatusBadge from './ui/StatusBadge.astro';
 import StatusIcon from './ui/StatusIcon.astro';
+import Icon from './ui/Icon.astro';
+import TimelineMarker from './ui/TimelineMarker.astro';
 import { regions, monitors, incident } from '../data/content';
 
-/* ---- Gráfico de latência (dados ilustrativos, determinísticos) ---- */
-const W = 720, H = 220, PAD_L = 44, PAD_B = 26, PAD_T = 10;
-const N = 48;
+/* ---- Gráfico de barras: latência p95 por hora e região (ilustrativo, determinístico) ---- */
+const HOURS = 24;
 const MAX = 800;
-let seed = 7;
+let seed = 11;
 const rand = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+const base: Record<string, number> = { gru: 62, iad: 158, fra: 232 };
 
-const base: Record<string, number> = { gru: 58, iad: 152, fra: 226 };
-const series = regions.map((r) => {
-  const pts = Array.from({ length: N }, (_, i) => {
-    const wave = Math.sin(i / 4) * 8 + (rand() - 0.5) * 22;
-    const spike = i >= 41 ? (i - 40) * 62 : 0;
-    return Math.max(20, base[r.id] + wave + spike);
-  });
-  const x = (i: number) => PAD_L + (i / (N - 1)) * (W - PAD_L - 6);
-  const y = (v: number) => PAD_T + (1 - v / MAX) * (H - PAD_T - PAD_B);
-  const d = pts.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
-  return { ...r, d, last: Math.round(pts[N - 1]), lastY: y(pts[N - 1]), lastX: x(N - 1) };
-});
-const gridY = [0, 200, 400, 600, 800].map((v) => ({
-  v,
-  y: PAD_T + (1 - v / MAX) * (H - PAD_T - PAD_B),
+const groups = Array.from({ length: HOURS }, (_, h) => ({
+  hour: h,
+  bars: regions.map((r) => {
+    const noise = Math.sin(h / 3) * 10 + (rand() - 0.5) * 30;
+    const spike = h >= 21 ? (h - 20) * 120 : 0;
+    const v = Math.max(24, base[r.id] + noise + spike);
+    return { color: r.color, pct: Math.min(100, (v / MAX) * 100).toFixed(1), v: Math.round(v) };
+  }),
 }));
-const gridX = ['00h', '06h', '12h', '18h', 'agora'].map((label, i) => ({
-  label,
-  x: PAD_L + (i / 4) * (W - PAD_L - 6),
-}));
-const thresholdY = PAD_T + (1 - 500 / MAX) * (H - PAD_T - PAD_B);
-
-const statusText = { up: 'operacional', degraded: 'lento', down: 'fora do ar' } as const;
-const summarize = (h: string[]) => {
-  const bad = h.filter((s) => s !== 'up').length;
-  return bad === 0 ? 'sem incidentes' : `${bad} ${bad === 1 ? 'dia' : 'dias'} com incidente`;
-};
+const last = groups[HOURS - 1].bars;
+const yTicks = [800, 600, 400, 200, 0];
+const thresholdPct = (500 / MAX) * 100;
 
 const kpis = [
-  { label: 'Disponibilidade, 30 dias', value: '99,87%', note: 'meta 99,9%', status: 'degraded' as const },
-  { label: 'Latência p95', value: '214 ms', note: 'média das 3 regiões' },
+  { label: 'Disponibilidade 30d', value: '99,87%', note: 'meta 99,9%', status: 'degraded' as const },
+  { label: 'Latência p95', value: '214 ms', note: 'média 24h, 3 regiões' },
   { label: 'Incidentes abertos', value: '1', note: 'há 6 min', status: 'down' as const },
   { label: 'Erros novos hoje', value: '3', note: '2 no checkout' },
 ];
 
 const nav = [
-  { label: 'Monitores', active: true },
-  { label: 'Incidentes', badge: '1' },
-  { label: 'Logs' },
-  { label: 'Erros' },
-  { label: 'Página de status' },
-  { label: 'Plantão' },
+  { label: 'Monitores', icon: 'activity', active: true },
+  { label: 'Incidentes', icon: 'bell', badge: '1' },
+  { label: 'Logs', icon: 'terminal' },
+  { label: 'Erros', icon: 'bug' },
+  { label: 'Página de status', icon: 'page' },
+  { label: 'Plantão', icon: 'clock' },
 ];
 
-const kindIcon = { detect: 'down', confirm: 'down', alert: 'alert', ack: 'ack', resolve: 'up' } as const;
 ---
-<section id="produto" class="section dash-section" aria-labelledby="dash-title">
-  <div class="container">
-    <div class="dash-intro">
-      <h2 id="dash-title" class="t-heading-lg">O que caiu, desde quando e quem já está olhando.</h2>
-      <p class="t-lead">
-        O painel abre no escuro, mostra latência por região, histórico de disponibilidade e a linha do tempo
-        de cada incidente. Todo status vem com cor, ícone e texto, para ninguém depender só do verde e do vermelho.
-      </p>
+<div
+  class="dash card"
+  role="img"
+  aria-label="Exemplo do painel do Pulso: quatro monitores, um fora do ar e um lento, gráfico de latência por região nas últimas 24 horas e a linha do tempo do incidente."
+>
+  <aside class="dash__side" aria-hidden="true">
+    <div class="dash__project">
+      <span class="dash__avatar">L</span>
+      <div>
+        <span class="dash__project-name">Loja</span>
+        <span class="dash__env">produção</span>
+      </div>
     </div>
+    <ul class="dash__nav">
+      {nav.map((n) => (
+        <li class:list={[{ 'is-active': n.active }]}>
+          <Icon name={n.icon} size={16} />
+          <span>{n.label}</span>
+          {n.badge && <span class="dash__nav-badge">{n.badge}</span>}
+        </li>
+      ))}
+    </ul>
+  </aside>
 
-    <div class="dash" role="img" aria-label="Exemplo do painel do Pulso: quatro monitores, um fora do ar, um lento, gráfico de latência por região e linha do tempo do incidente aberto.">
-      <aside class="dash__side" aria-hidden="true">
-        <div class="dash__project">
-          <span class="dash__project-name">Loja</span>
-          <span class="dash__env">Produção</span>
-        </div>
-        <ul class="dash__nav">
-          {nav.map((n) => (
-            <li class:list={[{ 'is-active': n.active }]}>
-              <span>{n.label}</span>
-              {n.badge && <span class="dash__nav-badge">{n.badge}</span>}
-            </li>
-          ))}
-        </ul>
-      </aside>
-
-      <div class="dash__main" aria-hidden="true">
-        <div class="dash__bar">
-          <span class="dash__crumb">Monitores</span>
-          <div class="dash__range">
-            <span>1 h</span><span class="is-active">24 h</span><span>7 d</span><span>30 d</span>
-          </div>
-        </div>
-
-        <div class="dash__kpis">
-          {kpis.map((k) => (
-            <div class="kpi">
-              <span class="kpi__label">{k.label}</span>
-              <span class="kpi__value">{k.value}</span>
-              <span class="kpi__note">
-                {k.status && <StatusIcon status={k.status} size={12} />}
-                {k.note}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div class="dash__grid">
-          <div class="panel panel--chart">
-            <div class="panel__head">
-              <span>Latência p95 do checkout por região</span>
-              <ul class="legend">
-                {series.map((s) => (
-                  <li>
-                    <svg width="22" height="8" viewBox="0 0 22 8"><path d="M1 4h20" stroke={s.color} stroke-width="2" stroke-dasharray={s.dash || undefined} stroke-linecap="round" /></svg>
-                    {s.name} <b>{s.last} ms</b>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <svg class="chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-              {gridY.map((g) => (
-                <>
-                  <line x1={PAD_L} x2={W} y1={g.y} y2={g.y} stroke="rgba(255,255,255,0.08)" />
-                  <text x={PAD_L - 8} y={g.y + 4} text-anchor="end">{g.v}</text>
-                </>
-              ))}
-              {gridX.map((g) => (
-                <text x={g.x} y={H - 6} text-anchor="middle">{g.label}</text>
-              ))}
-              <line x1={PAD_L} x2={W} y1={thresholdY} y2={thresholdY} stroke="#ffb829" stroke-dasharray="3 5" opacity="0.7" />
-              <text x={W - 4} y={thresholdY - 6} text-anchor="end" fill="#ffb829">limite 500 ms</text>
-              {series.map((s) => (
-                <path d={s.d} fill="none" stroke={s.color} stroke-width="2" stroke-dasharray={s.dash || undefined} stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
-              ))}
-            </svg>
-          </div>
-
-          <div class="panel panel--timeline">
-            <div class="panel__head panel__head--stack">
-              <StatusBadge status="down" label="Incidente aberto" compact />
-              <span class="tl__title">{incident.title}</span>
-            </div>
-            <ol class="tl">
-              {incident.events.map((e) => (
-                <li class={`tl__item tl__item--${e.kind}`}>
-                  <span class="tl__dot">
-                    {kindIcon[e.kind] === 'down' && <StatusIcon status="down" size={14} />}
-                    {kindIcon[e.kind] === 'alert' && (
-                      <svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 2a4 4 0 00-4 4v3l-1.5 2.5h11L12 9V6a4 4 0 00-4-4zM6.5 13a1.5 1.5 0 003 0" fill="none" stroke="#ffb829" stroke-width="1.5" stroke-linejoin="round" /></svg>
-                    )}
-                    {kindIcon[e.kind] === 'ack' && (
-                      <svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.3" fill="none" stroke="#bdbdbd" stroke-width="1.5" /><path d="M5.3 8.2l1.9 1.9 3.5-3.8" fill="none" stroke="#bdbdbd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                    )}
-                  </span>
-                  <span class="tl__time">{e.time}</span>
-                  <span class="tl__what">{e.title}</span>
-                  <span class="tl__detail">{e.detail}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-
-        <div class="panel panel--table">
-          <div class="table-scroll">
-            <table class="mon">
-              <thead>
-                <tr>
-                  <th scope="col">Monitor</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Últimos 45 dias</th>
-                  <th scope="col" class="num">30 dias</th>
-                  <th scope="col" class="num">p95</th>
-                </tr>
-              </thead>
-              <tbody>
-                {monitors.map((m) => (
-                  <tr>
-                    <td>
-                      <span class="mon__name">{m.name}</span>
-                      <span class="mon__url">{m.url}</span>
-                    </td>
-                    <td><StatusBadge status={m.status} compact /></td>
-                    <td>
-                      <span class="bars" title={summarize(m.history)}>
-                        {m.history.map((s) => <i class={`bar bar--${s}`} title={statusText[s]} />)}
-                      </span>
-                    </td>
-                    <td class="num">{m.uptime}</td>
-                    <td class="num">{m.p95}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+  <div class="dash__main" aria-hidden="true">
+    <div class="dash__bar">
+      <div class="dash__title">
+        <Icon name="activity" size={18} class="accent" />
+        <span>Monitores</span>
+      </div>
+      <div class="dash__range">
+        <span>1h</span><span class="is-active">24h</span><span>7d</span><span>30d</span>
       </div>
     </div>
 
-    <ul class="legend-a11y" aria-label="Como ler os status">
-      <li><StatusBadge status="up" /> <span>Respondendo dentro do esperado</span></li>
-      <li><StatusBadge status="degraded" /> <span>No ar, mas acima do limite de latência</span></li>
-      <li><StatusBadge status="down" /> <span>Queda confirmada por mais de uma região</span></li>
-    </ul>
+    <div class="dash__kpis">
+      {kpis.map((k) => (
+        <div class="kpi">
+          <span class="kpi__label">{k.label}</span>
+          <span class="kpi__value">{k.value}</span>
+          <span class="kpi__note">
+            {k.status && <StatusIcon status={k.status} size={12} />}
+            {k.note}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <div class="dash__grid">
+      <div class="panel">
+        <div class="panel__head">
+          <span class="panel__title">Latência p95 do checkout por região</span>
+          <ul class="legend">
+            {regions.map((r, i) => (
+              <li>
+                <span class="legend__swatch" style={`background:${r.color}`}></span>
+                {r.short} <b>{last[i].v} ms</b>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="chart">
+          <div class="chart__y">
+            {yTicks.map((t) => <span>{t}</span>)}
+          </div>
+          <div class="chart__plot">
+            {yTicks.map((_, i) => <span class="chart__grid" style={`top:${i * 25}%`}></span>)}
+            <span class="chart__limit" style={`bottom:${thresholdPct}%`}><em>limite 500 ms</em></span>
+            <div class="chart__bars">
+              {groups.map((g) => (
+                <div class="chart__group">
+                  {g.bars.map((b) => <i style={`height:${b.pct}%;background:${b.color}`}></i>)}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div class="chart__x">
+            <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>agora</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head panel__head--stack">
+          <StatusBadge status="down" label="Incidente" />
+          <span class="panel__title">{incident.title}</span>
+        </div>
+        <ol class="tl">
+          {incident.events.slice(0, 5).map((e) => (
+            <li class="tl__item">
+              <span class="tl__dot"><TimelineMarker kind={e.kind} size={12} /></span>
+              <span class="tl__time">{e.time}</span>
+              <span class="tl__what">{e.title}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+
+    <div class="panel panel--flush">
+      <div class="table-scroll">
+        <table class="mon">
+          <thead>
+            <tr>
+              <th scope="col">Monitor</th>
+              <th scope="col">Status</th>
+              <th scope="col">Últimos 45 dias</th>
+              <th scope="col" class="num">30d</th>
+              <th scope="col" class="num">p95</th>
+            </tr>
+          </thead>
+          <tbody>
+            {monitors.map((m) => (
+              <tr>
+                <td>
+                  <span class="mon__name">{m.name}</span>
+                  <span class="mon__url">{m.url}</span>
+                </td>
+                <td><StatusBadge status={m.status} /></td>
+                <td>
+                  <span class="bars">
+                    {m.history.map((s) => <i class={`bar bar--${s}`} />)}
+                  </span>
+                </td>
+                <td class="num">{m.uptime}</td>
+                <td class="num">{m.p95}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-</section>
+</div>
 
 <style>
-  .dash-intro {
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    gap: clamp(24px, 4vw, 60px);
-    align-items: end;
-    margin-bottom: var(--spacing-60);
-  }
-
   .dash {
     display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-3xl);
-    background: var(--surface-1);
+    grid-template-columns: 208px minmax(0, 1fr);
     overflow: hidden;
-    font-size: 14px;
-    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0;
+    text-align: left;
+    background: var(--color-pure-black);
+    border-color: var(--color-slate-edge);
   }
+  .dash :global(.accent) { color: var(--color-soft-indigo); }
 
   .dash__side {
-    padding: var(--spacing-24) var(--spacing-18);
-    border-right: 1px solid var(--line);
+    padding: 16px 12px;
+    border-right: 1px solid var(--color-iron);
+    background: var(--color-carbon);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-24);
+    gap: 20px;
   }
-  .dash__project { display: flex; flex-direction: column; gap: 6px; padding-inline: 10px; }
-  .dash__project-name { font-weight: 500; font-size: 15px; }
-  .dash__env { font-size: 12px; color: var(--status-up); }
+  .dash__project { display: flex; align-items: center; gap: 10px; padding: 4px 8px; }
+  .dash__avatar {
+    width: 28px; height: 28px; display: grid; place-items: center;
+    border-radius: 6px; background: var(--color-iron); font-weight: 600; font-size: 13px;
+  }
+  .dash__project-name { display: block; font-weight: 500; font-size: 14px; }
+  .dash__env { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--color-ash); }
   .dash__nav { display: flex; flex-direction: column; gap: 2px; }
   .dash__nav li {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 9px 10px; border-radius: 10px; color: var(--color-ash-gray);
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px; border-radius: 6px; color: var(--color-ash);
   }
-  .dash__nav li.is-active { background: var(--surface-2); color: var(--color-bone-white); }
+  .dash__nav li span:nth-of-type(1) { flex: 1; }
+  .dash__nav li.is-active { background: var(--color-iron); color: var(--color-bone); }
   .dash__nav-badge {
-    min-width: 20px; height: 20px; padding: 0 6px; display: inline-grid; place-items: center;
-    border-radius: var(--radius-full); background: var(--status-down); color: #000; font-size: 12px; font-weight: 600;
+    min-width: 18px; height: 18px; padding: 0 5px; display: inline-grid; place-items: center;
+    border-radius: 4px; background: var(--color-slate-edge); color: var(--color-bone);
+    font-family: var(--font-mono); font-size: 11px;
   }
 
-  .dash__main { padding: var(--spacing-24); display: flex; flex-direction: column; gap: var(--spacing-18); min-width: 0; }
-  .dash__bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .dash__crumb { font-size: 18px; font-weight: 500; }
-  .dash__range { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-full); }
-  .dash__range span { padding: 5px 12px; border-radius: var(--radius-full); color: var(--color-ash-gray); font-size: 13px; }
-  .dash__range .is-active { background: var(--surface-2); color: var(--color-bone-white); }
+  .dash__main { padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; background: var(--color-carbon); }
+  .dash__bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 4px; }
+  .dash__title { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; }
+  .dash__range { display: flex; padding: 2px; border: 1px solid var(--color-iron); border-radius: 6px; background: var(--color-graphite); }
+  .dash__range span { padding: 4px 10px; border-radius: 4px; color: var(--color-ash); font-family: var(--font-mono); font-size: 11px; }
+  .dash__range .is-active { background: var(--color-iron); color: var(--color-bone); }
 
-  .dash__kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--spacing-12); }
-  .kpi { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; }
-  .kpi__label { font-size: 13px; color: var(--color-ash-gray); }
-  .kpi__value { font-size: 30px; letter-spacing: -0.03em; line-height: 1.1; }
-  .kpi__note { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-silver-mist); }
+  .dash__kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .kpi { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; background: var(--color-graphite); border: 1px solid var(--color-iron); border-radius: 8px; }
+  .kpi__label { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ash); }
+  .kpi__value { font-size: 24px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.2; }
+  .kpi__note { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-ash); }
 
-  .dash__grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: var(--spacing-12); }
-  .panel { border: 1px solid var(--line); border-radius: 16px; padding: 18px; min-width: 0; }
-  .panel__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-  .panel__head--stack { flex-direction: column; gap: 10px; }
-  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--color-silver-mist); }
+  .dash__grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 8px; }
+  .panel { padding: 14px; background: var(--color-graphite); border: 1px solid var(--color-iron); border-radius: 8px; min-width: 0; }
+  .panel--flush { padding: 4px 0 0; }
+  .panel__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .panel__head--stack { flex-direction: column; gap: 8px; }
+  .panel__title { font-weight: 500; font-size: 13px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 11px; color: var(--color-ash); }
   .legend li { display: inline-flex; align-items: center; gap: 6px; }
-  .legend b { font-weight: 500; color: var(--color-bone-white); font-family: var(--font-mono); }
-  .chart { width: 100%; height: 220px; overflow: visible; }
-  .chart text { font-family: var(--font-mono); font-size: 10px; fill: #8a8a8a; }
+  .legend b { font-weight: 400; color: var(--color-bone); }
+  .legend__swatch { width: 8px; height: 8px; border-radius: 2px; }
 
-  .tl__title { font-size: 15px; font-weight: 500; line-height: 1.3; }
-  .tl { position: relative; display: flex; flex-direction: column; gap: 14px; }
-  .tl::before { content: ''; position: absolute; left: 10px; top: 8px; bottom: 8px; width: 1px; background: var(--line-strong); }
-  .tl__item { position: relative; display: grid; grid-template-columns: 22px auto 1fr; column-gap: 10px; align-items: baseline; }
-  .tl__dot { grid-row: span 2; width: 22px; height: 22px; display: grid; place-items: center; background: var(--surface-1); align-self: start; }
-  .tl__time { font-family: var(--font-mono); font-size: 11px; color: var(--color-ash-gray); }
-  .tl__what { font-size: 13px; }
-  .tl__detail { grid-column: 2 / -1; font-size: 12px; color: var(--color-silver-mist); }
+  .chart { display: grid; grid-template-columns: 30px 1fr; grid-template-rows: 180px auto; column-gap: 8px; }
+  .chart__y { display: flex; flex-direction: column; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--color-mist); text-align: right; margin-block: -6px; }
+  .chart__plot { position: relative; }
+  .chart__grid { position: absolute; left: 0; right: 0; height: 1px; background: var(--color-iron); }
+  .chart__limit { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--color-ash); z-index: 1; }
+  .chart__limit em {
+    position: absolute; right: 0; top: -18px; font-style: normal;
+    font-family: var(--font-mono); font-size: 10px; color: var(--color-ash);
+    background: var(--color-graphite); padding: 0 4px;
+  }
+  .chart__bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 4px; }
+  .chart__group { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 1.5px; }
+  .chart__group i { width: 100%; max-width: 6px; border-radius: 2px 2px 0 0; }
+  .chart__x { grid-column: 2; display: flex; justify-content: space-between; padding-top: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--color-mist); }
+
+  .tl { position: relative; display: flex; flex-direction: column; gap: 12px; }
+  .tl::before { content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 1px; background: var(--color-slate-edge); }
+  .tl__item { position: relative; display: grid; grid-template-columns: 18px 1fr; column-gap: 10px; row-gap: 2px; }
+  .tl__dot { grid-row: span 2; width: 18px; height: 18px; display: grid; place-items: center; background: var(--color-graphite); }
+  .tl__time { font-family: var(--font-mono); font-size: 10.5px; color: var(--color-ash); }
+  .tl__what { grid-column: 2; font-size: 12.5px; }
 
   .table-scroll { overflow-x: auto; }
-  .mon { width: 100%; border-collapse: collapse; min-width: 720px; }
-  .mon th { text-align: left; font-weight: 400; font-size: 12px; color: var(--color-ash-gray); padding: 0 12px 12px; }
-  .mon td { padding: 12px; border-top: 1px solid var(--line); vertical-align: middle; }
-  .mon .num { text-align: right; font-family: var(--font-mono); font-size: 13px; white-space: nowrap; }
-  .mon__name { display: block; font-weight: 500; }
-  .mon__url { display: block; font-family: var(--font-mono); font-size: 12px; color: var(--color-ash-gray); }
-  .bars { display: flex; gap: 2px; height: 26px; align-items: stretch; }
-  .bar { flex: 1; min-width: 3px; border-radius: 2px; background: var(--status-up); opacity: 0.75; }
-  .bar--degraded { background: var(--status-degraded); opacity: 1; height: 70%; align-self: flex-end; }
-  .bar--down { background: var(--status-down); opacity: 1; height: 45%; align-self: flex-end; }
-
-  .legend-a11y {
-    display: flex; flex-wrap: wrap; gap: var(--spacing-18) var(--spacing-36);
-    margin-top: var(--spacing-30);
-    font-size: var(--text-base); font-weight: 400; color: var(--color-silver-mist);
+  .mon { width: 100%; border-collapse: collapse; min-width: 680px; }
+  .mon th {
+    text-align: left; font-weight: 400; padding: 8px 14px;
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ash);
   }
-  .legend-a11y li { display: inline-flex; align-items: center; gap: 12px; }
+  .mon td { padding: 10px 14px; border-top: 1px solid var(--color-iron); vertical-align: middle; }
+  .mon .num { text-align: right; font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
+  .mon__name { display: block; font-weight: 500; }
+  .mon__url { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--color-ash); }
+  .bars { display: flex; gap: 2px; height: 22px; align-items: flex-end; }
+  .bar { flex: 1; min-width: 2px; height: 100%; border-radius: 1px; background: var(--color-slate-edge); }
+  .bar--degraded { background: var(--status-degraded); height: 65%; }
+  .bar--down { background: var(--status-down); height: 40%; }
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1080px) {
     .dash { grid-template-columns: 1fr; }
     .dash__side { display: none; }
     .dash__grid { grid-template-columns: 1fr; }
   }
-  @media (max-width: 860px) {
-    .dash-intro { grid-template-columns: 1fr; }
+  @media (max-width: 720px) {
     .dash__kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 520px) {
-    .dash__main { padding: 14px; }
-    .kpi__value { font-size: 24px; }
+    .chart__group { gap: 1px; }
+    .chart__bars { gap: 2px; }
   }
 </style>

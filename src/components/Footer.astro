@@ -3,23 +3,25 @@ import Logo from './ui/Logo.astro';
 import StatusIcon from './ui/StatusIcon.astro';
 
 const cols = [
-  { title: 'Produto', links: [['Monitoramento', '#recursos'], ['Alertas e plantão', '#recursos'], ['Logs e métricas', '#recursos'], ['Preços', '#precos']] },
-  { title: 'Desenvolvedores', links: [['Documentação', '/docs'], ['API REST', '/docs/api'], ['OpenTelemetry', '/docs/opentelemetry'], ['Changelog', '/changelog']] },
-  { title: 'Empresa', links: [['Sobre', '/sobre'], ['Contato', '/contato'], ['Termos de uso', '/termos'], ['Privacidade e LGPD', '/privacidade']] },
+  { title: 'Produto', links: [['Monitoramento', '#plataforma'], ['Alertas e plantão', '#plataforma'], ['Logs e métricas', '#plataforma'], ['Rastreamento de erros', '#plataforma'], ['Página de status', '#plataforma'], ['Preços', '#precos']] },
+  { title: 'Desenvolvedores', links: [['Documentação', '/docs'], ['Início rápido', '/docs/inicio-rapido'], ['API REST', '/docs/api'], ['OpenTelemetry', '/docs/opentelemetry'], ['SDKs', '/docs/sdks'], ['Changelog', '/changelog']] },
+  { title: 'Empresa', links: [['Sobre', '/sobre'], ['Contato', '/contato'], ['Segurança', '/seguranca']] },
+  { title: 'Legal', links: [['Termos de uso', '/termos'], ['Privacidade e LGPD', '/privacidade']] },
 ];
 ---
 <footer class="footer">
   <div class="container footer__grid">
     <div class="footer__brand">
       <Logo />
+      <p class="t-body-sm">Monitoramento, alertas, logs, erros e página de status para quem desenvolve.</p>
       <a href="https://status.pulso.dev" class="footer__status">
-        <StatusIcon status="up" size={14} />
+        <StatusIcon status="up" size={12} />
         <span>Todos os sistemas operacionais</span>
       </a>
     </div>
     {cols.map((c) => (
-      <nav aria-label={c.title}>
-        <h2 class="footer__title">{c.title}</h2>
+      <nav aria-label={c.title} class="footer__col">
+        <h2 class="t-eyebrow footer__title">{c.title}</h2>
         <ul>
           {c.links.map(([label, href]) => (
             <li><a href={href}>{label}</a></li>
@@ -35,15 +37,26 @@ const cols = [
 </footer>
 
 <style>
-  .footer { border-top: 1px solid var(--line); padding: var(--spacing-60) 0 calc(var(--spacing-36) + env(safe-area-inset-bottom, 0px)); font-weight: 400; }
-  .footer__grid { display: grid; grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); gap: var(--spacing-36); }
-  .footer__brand { display: flex; flex-direction: column; gap: var(--spacing-18); align-items: flex-start; }
-  .footer__status { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; color: var(--color-silver-mist); }
-  .footer__status:hover { color: var(--color-bone-white); }
-  .footer__title { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
-  .footer ul { display: flex; flex-direction: column; }
-  .footer ul a { display: inline-flex; align-items: center; min-height: 36px; font-size: 14px; color: var(--color-ash-gray); }
-  .footer ul a:hover { color: var(--color-bone-white); }
-  .footer__bottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: var(--spacing-60); font-size: 13px; color: var(--color-ash-gray); }
-  @media (max-width: 860px) { .footer__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .footer__brand { grid-column: 1 / -1; } }
+  .footer { padding: var(--spacing-64) 0 calc(var(--spacing-32) + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--color-iron); }
+  .footer__grid { display: grid; grid-template-columns: 1.6fr repeat(4, minmax(0, 1fr)); gap: var(--spacing-32); }
+  .footer__brand { display: flex; flex-direction: column; gap: var(--spacing-16); align-items: flex-start; max-width: 300px; }
+  .footer__status {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 10px;
+    border: 1px solid var(--color-iron); border-radius: var(--radius-navpills);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.02em; color: var(--color-ash);
+  }
+  .footer__status:hover { border-color: var(--color-smoke); color: var(--color-bone); }
+  .footer__title { color: var(--color-bone); margin-bottom: 16px; }
+  .footer__col ul { display: flex; flex-direction: column; gap: 4px; }
+  .footer__col a { display: inline-flex; align-items: center; min-height: 32px; font-size: var(--text-body-sm); color: var(--color-ash); }
+  .footer__col a:hover { color: var(--color-bone); }
+  .footer__bottom {
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    margin-top: var(--spacing-64); padding-top: var(--spacing-24); border-top: 1px solid var(--color-iron);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-mist);
+  }
+  @media (max-width: 960px) {
+    .footer__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .footer__brand { grid-column: 1 / -1; max-width: none; }
+  }
 </style>

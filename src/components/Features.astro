@@ -1,256 +1,285 @@
 ---
+import Icon from './ui/Icon.astro';
 import StatusIcon from './ui/StatusIcon.astro';
 import StatusBadge from './ui/StatusBadge.astro';
 import { regions, channels, escalation } from '../data/content';
+
+const tabs = [
+  { id: 'uptime', icon: 'globe', title: 'Monitoramento de URLs', summary: 'Três regiões checam e confirmam antes de alertar.' },
+  { id: 'alerts', icon: 'bell', title: 'Alertas e plantão', summary: 'Seis canais e escalonamento automático.' },
+  { id: 'logs', icon: 'terminal', title: 'Logs e métricas', summary: 'OpenTelemetry na entrada, ClickHouse por baixo.' },
+  { id: 'errors', icon: 'bug', title: 'Rastreamento de erros', summary: 'SDK leve com stack trace e release.' },
+  { id: 'status', icon: 'page', title: 'Página de status', summary: 'Site estático que segue no ar no pior dia.' },
+];
 ---
-<section id="recursos" class="section features" aria-labelledby="features-title">
+<section id="plataforma" class="section platform" aria-labelledby="platform-title">
   <div class="container">
-    <h2 id="features-title" class="t-heading-lg features__title">Monitorar, avisar, investigar e comunicar.</h2>
+    <div class="section-head">
+      <p class="t-eyebrow">Plataforma</p>
+      <h2 id="platform-title" class="t-display-sm">Monitorar, avisar, investigar e comunicar. Num lugar só.</h2>
+      <p>Cada parte resolve um momento do incidente, e todas compartilham a mesma linha do tempo.</p>
+    </div>
 
-    <!-- 1. Monitoramento multirregional -->
-    <article class="feat">
-      <div class="feat__copy">
-        <p class="t-label">Monitoramento de URLs</p>
-        <h3 class="t-heading">Três regiões precisam concordar antes de alguém ser acordado.</h3>
-        <p class="t-lead">
-          Agentes em São Paulo, nos Estados Unidos e na Europa checam cada endpoint. Quando um deles vê falha,
-          os outros verificam na mesma hora. Oscilação de rede local vira registro, não alerta.
-        </p>
-        <ul class="feat__points">
-          <li>HTTP, palavra-chave na resposta, certificado SSL e vencimento de domínio</li>
-          <li>Latência medida por região, com p50, p95 e p99</li>
-        </ul>
+    <div class="pf" data-tabs>
+      <div class="pf__tabs" role="tablist" aria-label="Recursos do Pulso" aria-orientation="vertical">
+        {tabs.map((t, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`pf-tab-${t.id}`}
+            aria-controls={`pf-panel-${t.id}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+            class="pf__tab"
+          >
+            <Icon name={t.icon} size={18} class="pf__tab-icon" />
+            <span class="pf__tab-text">
+              <span class="pf__tab-title">{t.title}</span>
+              <span class="pf__tab-summary">{t.summary}</span>
+            </span>
+          </button>
+        ))}
       </div>
-      <div class="feat__visual" aria-hidden="true">
-        <div class="consensus">
-          {regions.map((r, i) => (
-            <div class="consensus__node">
-              <span class="consensus__code" style={`color:${r.color}`}>{r.short}</span>
-              <span class="consensus__name">{r.name}</span>
-              <span class="consensus__res">
-                <StatusIcon status={i === 0 ? 'down' : 'up'} size={14} />
-                {i === 0 ? 'timeout' : '200 OK'}
-              </span>
+
+      <div class="pf__panels">
+        <!-- Monitoramento -->
+        <div role="tabpanel" id="pf-panel-uptime" aria-labelledby="pf-tab-uptime" class="pf__panel card" tabindex="0">
+          <div class="pf__visual" aria-hidden="true">
+            <div class="consensus">
+              {regions.map((r, i) => (
+                <div class="consensus__node">
+                  <span class="consensus__code">{r.short}</span>
+                  <span class="consensus__name">{r.name}</span>
+                  <span class="consensus__res">
+                    <StatusIcon status={i === 0 ? 'down' : 'up'} size={12} />
+                    {i === 0 ? 'timeout 10 s' : '200 OK em 188 ms'}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-          <div class="consensus__verdict">
-            <StatusIcon status="up" size={16} />
-            <span><strong>1 de 3 falhou.</strong> Registrado como oscilação em São Paulo. Nenhum alerta enviado.</span>
+            <div class="verdict">
+              <StatusIcon status="up" size={14} />
+              <span><b>1 de 3 falhou.</b> Registrado como oscilação em São Paulo. Nenhum alerta enviado.</span>
+            </div>
+          </div>
+          <div class="pf__copy">
+            <h3 class="t-heading">Três regiões precisam concordar antes de alguém ser acordado.</h3>
+            <p>Agentes em São Paulo, nos Estados Unidos e na Europa checam cada endpoint. Quando um vê falha, os outros verificam na mesma hora. Oscilação de rede local vira registro, não alerta.</p>
+            <ul class="pf__points">
+              <li><Icon name="check" size={16} /> HTTP, palavra-chave, SSL e vencimento de domínio</li>
+              <li><Icon name="check" size={16} /> Latência por região com p50, p95 e p99</li>
+            </ul>
           </div>
         </div>
-      </div>
-    </article>
 
-    <!-- 2. Alertas e plantão -->
-    <article class="feat feat--rev">
-      <div class="feat__copy">
-        <p class="t-label">Alertas e plantão</p>
-        <h3 class="t-heading">O aviso chega no canal que a pessoa de plantão realmente olha.</h3>
-        <p class="t-lead">
-          Configure escalas por semana, regras de escalonamento e horários de silêncio. Se ninguém reconhecer o
-          alerta, o Pulso sobe um nível e troca o canal, até chegar em alguém.
-        </p>
-      </div>
-      <div class="feat__visual" aria-hidden="true">
-        <ul class="chips">
-          {channels.map((c) => <li>{c}</li>)}
-        </ul>
-        <ol class="ladder">
-          {escalation.map((e, i) => (
-            <li>
-              <span class="ladder__after">{e.after}</span>
-              <span class="ladder__who">{e.who}</span>
-              <span class="ladder__how">{e.how}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </article>
-
-    <!-- 3. Logs e métricas -->
-    <article class="feat">
-      <div class="feat__copy">
-        <p class="t-label">Logs e métricas</p>
-        <h3 class="t-heading">Aponte o OpenTelemetry e pesquise milhões de linhas em segundos.</h3>
-        <p class="t-lead">
-          O endpoint de ingestão é compatível com OpenTelemetry, então o que você já instrumentou funciona
-          sem mudança. Os dados ficam no ClickHouse, feito para filtrar e agregar grandes volumes rapidamente.
-        </p>
-        <ul class="feat__points">
-          <li>Logs, métricas e traces correlacionados pelo mesmo incidente</li>
-          <li>Filtros por serviço, nível, release e qualquer atributo</li>
-        </ul>
-      </div>
-      <div class="feat__visual" aria-hidden="true">
-        <div class="logs">
-          <div class="logs__query"><span class="t-muted">service</span> = checkout <span class="t-muted">and level</span> &gt;= warn</div>
-          <ul class="logs__list">
-            <li><span class="logs__t">14:02:07.912</span><span class="lv lv--err">ERROR</span>webhook dispatch failed: upstream 503</li>
-            <li><span class="logs__t">14:02:07.640</span><span class="lv lv--warn">WARN</span>queue lag 41s on payments.events</li>
-            <li><span class="logs__t">14:02:06.118</span><span class="lv lv--err">ERROR</span>worker crashed: out of memory (2048 MB)</li>
-            <li><span class="logs__t">14:01:58.402</span><span class="lv lv--warn">WARN</span>retry 3/5 for order 88412</li>
-            <li><span class="logs__t">14:01:52.077</span><span class="lv lv--info">INFO</span>deploy 2.4.1 finished on 6 pods</li>
-          </ul>
-          <div class="logs__foot">12,4 mi de linhas lidas em 0,41 s</div>
-        </div>
-      </div>
-    </article>
-
-    <!-- 4. Rastreamento de erros -->
-    <article class="feat feat--rev">
-      <div class="feat__copy">
-        <p class="t-label">Rastreamento de erros</p>
-        <h3 class="t-heading">O erro chega com a linha exata, o release e quem foi afetado.</h3>
-        <p class="t-lead">
-          O SDK leve para JavaScript, Python e PHP captura exceções com stack trace, agrupa repetições e
-          avisa só quando um erro é novo ou volta depois de resolvido.
-        </p>
-      </div>
-      <div class="feat__visual" aria-hidden="true">
-        <div class="trace">
-          <div class="trace__head">
-            <span class="trace__type">TypeError</span>
-            <span class="trace__msg">Cannot read properties of undefined (reading 'total')</span>
-            <span class="trace__meta">release 2.4.1, 312 ocorrências, 48 usuários</span>
+        <!-- Alertas -->
+        <div role="tabpanel" id="pf-panel-alerts" aria-labelledby="pf-tab-alerts" class="pf__panel card" tabindex="0" hidden>
+          <div class="pf__visual" aria-hidden="true">
+            <ul class="chips">
+              {channels.map((c) => <li class="tag">{c}</li>)}
+            </ul>
+            <ol class="ladder">
+              {escalation.map((e, i) => (
+                <li>
+                  <span class="ladder__n">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="ladder__who">{e.who}<small>{e.how}</small></span>
+                  <span class="ladder__after">{e.after}</span>
+                </li>
+              ))}
+            </ol>
           </div>
-          <pre class="trace__stack"><code><span class="trace__fn">at calcularFrete</span> <span class="t-muted">src/checkout/frete.ts:42:18</span>
+          <div class="pf__copy">
+            <h3 class="t-heading">O aviso chega no canal que a pessoa de plantão realmente olha.</h3>
+            <p>Configure escalas por semana, regras de escalonamento e horários de silêncio. Se ninguém reconhecer o alerta, o Pulso sobe um nível e troca de canal até chegar em alguém.</p>
+            <ul class="pf__points">
+              <li><Icon name="check" size={16} /> E-mail, Slack, Discord, WhatsApp, SMS e ligação</li>
+              <li><Icon name="check" size={16} /> Reconhecimento direto pelo Slack ou pelo telefone</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Logs -->
+        <div role="tabpanel" id="pf-panel-logs" aria-labelledby="pf-tab-logs" class="pf__panel card" tabindex="0" hidden>
+          <div class="pf__visual pf__visual--mono" aria-hidden="true">
+            <div class="query"><span class="t-muted">service</span> = checkout <span class="t-muted">and level</span> &gt;= warn</div>
+            <ul class="logs">
+              <li><span class="logs__t">14:02:07.912</span><span class="lv lv--err">ERROR</span><span>webhook dispatch failed: upstream 503</span></li>
+              <li><span class="logs__t">14:02:07.640</span><span class="lv lv--warn">WARN</span><span>queue lag 41s on payments.events</span></li>
+              <li><span class="logs__t">14:02:06.118</span><span class="lv lv--err">ERROR</span><span>worker crashed: out of memory</span></li>
+              <li><span class="logs__t">14:01:58.402</span><span class="lv lv--warn">WARN</span><span>retry 3/5 for order 88412</span></li>
+              <li><span class="logs__t">14:01:52.077</span><span class="lv">INFO</span><span>deploy 2.4.1 finished on 6 pods</span></li>
+            </ul>
+            <p class="logs__foot">12,4 mi de linhas lidas em 0,41 s</p>
+          </div>
+          <div class="pf__copy">
+            <h3 class="t-heading">Aponte o OpenTelemetry e pesquise milhões de linhas em segundos.</h3>
+            <p>O endpoint de ingestão é compatível com OpenTelemetry, então o que você já instrumentou funciona sem mudança. Os dados ficam no ClickHouse, feito para filtrar e agregar grandes volumes.</p>
+            <ul class="pf__points">
+              <li><Icon name="check" size={16} /> Logs, métricas e traces no mesmo incidente</li>
+              <li><Icon name="check" size={16} /> Filtros por serviço, nível, release e atributo</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Erros -->
+        <div role="tabpanel" id="pf-panel-errors" aria-labelledby="pf-tab-errors" class="pf__panel card" tabindex="0" hidden>
+          <div class="pf__visual pf__visual--mono" aria-hidden="true">
+            <div class="trace__head">
+              <span class="trace__type"><StatusIcon status="down" size={12} /> TypeError</span>
+              <span class="trace__msg">Cannot read properties of undefined (reading 'total')</span>
+              <span class="trace__meta">release 2.4.1 &nbsp;/&nbsp; 312 ocorrências &nbsp;/&nbsp; 48 usuários</span>
+            </div>
+            <pre class="trace"><code><span class="trace__fn">at calcularFrete</span> <span class="t-muted">src/checkout/frete.ts:42:18</span>
 <span class="trace__line"><span class="trace__ln">41</span>  const pacote = carrinho.itens.at(-1);</span>
 <span class="trace__line trace__line--hit"><span class="trace__ln">42</span>  return pacote.total * taxa;</span>
 <span class="trace__line"><span class="trace__ln">43</span>}</span>
 <span class="trace__fn">at finalizarPedido</span> <span class="t-muted">src/checkout/pedido.ts:117:9</span>
 <span class="trace__fn">at POST /api/checkout</span> <span class="t-muted">src/routes/checkout.ts:23:5</span></code></pre>
+          </div>
+          <div class="pf__copy">
+            <h3 class="t-heading">O erro chega com a linha exata, o release e quem foi afetado.</h3>
+            <p>O SDK leve para JavaScript, Python e PHP captura exceções com stack trace, agrupa repetições e avisa só quando um erro é novo ou volta depois de resolvido.</p>
+            <ul class="pf__points">
+              <li><Icon name="check" size={16} /> Agrupamento automático de ocorrências</li>
+              <li><Icon name="check" size={16} /> Ligado ao log e ao incidente do mesmo instante</li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </article>
 
-    <!-- 5. Página de status -->
-    <article class="feat">
-      <div class="feat__copy">
-        <p class="t-label">Página de status pública</p>
-        <h3 class="t-heading">Uma página de status que continua no ar quando todo o resto cai.</h3>
-        <p class="t-lead">
-          A página é publicada como site estático, separada da plataforma. Seus clientes acompanham o incidente
-          e as atualizações mesmo no pior cenário, inclusive se o próprio Pulso estiver indisponível.
-        </p>
-        <ul class="feat__points">
-          <li>Domínio próprio, sua marca e inscrição por e-mail</li>
-          <li>Atualizações do incidente publicadas direto do painel</li>
-        </ul>
-      </div>
-      <div class="feat__visual" aria-hidden="true">
-        <div class="sp">
-          <div class="sp__top">
-            <span class="sp__brand">status.loja.com.br</span>
-            <span class="sp__static">site estático</span>
-          </div>
-          <div class="sp__banner">
-            <StatusIcon status="degraded" size={18} />
-            <div>
-              <strong>Instabilidade nos pagamentos</strong>
-              <span>Identificamos a causa e estamos aplicando a correção. Próxima atualização às 14:40.</span>
+        <!-- Status page -->
+        <div role="tabpanel" id="pf-panel-status" aria-labelledby="pf-tab-status" class="pf__panel card" tabindex="0" hidden>
+          <div class="pf__visual" aria-hidden="true">
+            <div class="sp__top">
+              <span class="sp__brand">status.loja.com.br</span>
+              <span class="tag">Site estático</span>
             </div>
+            <div class="sp__banner">
+              <StatusIcon status="degraded" size={14} />
+              <div>
+                <b>Instabilidade nos pagamentos</b>
+                <span>Identificamos a causa e estamos aplicando a correção. Próxima atualização às 14:40.</span>
+              </div>
+            </div>
+            <ul class="sp__list">
+              <li><span>Loja virtual</span><StatusBadge status="up" /></li>
+              <li><span>Pagamentos</span><StatusBadge status="degraded" /></li>
+              <li><span>API pública</span><StatusBadge status="up" /></li>
+            </ul>
           </div>
-          <ul class="sp__list">
-            <li><span>Loja virtual</span><StatusBadge status="up" compact /></li>
-            <li><span>Pagamentos</span><StatusBadge status="degraded" compact /></li>
-            <li><span>API pública</span><StatusBadge status="up" compact /></li>
-          </ul>
+          <div class="pf__copy">
+            <h3 class="t-heading">Uma página de status que continua no ar quando todo o resto cai.</h3>
+            <p>A página é publicada como site estático, separada da plataforma. Seus clientes acompanham o incidente mesmo no pior cenário, inclusive se o próprio Pulso estiver indisponível.</p>
+            <ul class="pf__points">
+              <li><Icon name="check" size={16} /> Domínio próprio e inscrição por e-mail</li>
+              <li><Icon name="check" size={16} /> Atualizações publicadas direto do painel</li>
+            </ul>
+          </div>
         </div>
       </div>
-    </article>
+    </div>
   </div>
 </section>
 
+<script>
+  import { initTabs } from '../scripts/tabs';
+  initTabs();
+</script>
+
 <style>
-  .features__title { max-width: 14ch; margin-bottom: var(--section-gap); }
+  .pf { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: var(--spacing-24); align-items: start; }
 
-  .feat {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: clamp(36px, 6vw, 96px);
-    align-items: center;
+  .pf__tabs { display: flex; flex-direction: column; gap: 4px; }
+  .pf__tab {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%; padding: 16px; text-align: left;
+    background: transparent; border: 1px solid transparent; border-radius: var(--radius-cards);
+    cursor: pointer; color: var(--color-ash);
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   }
-  .feat + .feat { margin-top: var(--section-gap); }
-  .feat--rev .feat__copy { order: 2; }
-  .feat__copy { display: flex; flex-direction: column; gap: var(--spacing-18); }
-  .feat__points { display: flex; flex-direction: column; gap: 10px; margin-top: var(--spacing-6); color: var(--color-bone-white); font-weight: 300; }
-  .feat__points li { padding-left: 22px; position: relative; }
-  .feat__points li::before {
-    content: ''; position: absolute; left: 0; top: 0.62em; width: 10px; height: 1px; background: var(--color-electric-iris);
-  }
+  .pf__tab:hover { background: var(--color-graphite); color: var(--color-bone); }
+  .pf__tab[aria-selected='true'] { background: var(--color-graphite); border-color: var(--color-iron); color: var(--color-bone); }
+  .pf__tab :global(.pf__tab-icon) { flex: none; margin-top: 2px; }
+  .pf__tab[aria-selected='true'] :global(.pf__tab-icon) { color: var(--color-soft-indigo); }
+  .pf__tab-text { display: flex; flex-direction: column; gap: 2px; }
+  .pf__tab-title { font-size: var(--text-body); font-weight: 500; }
+  .pf__tab-summary { font-size: var(--text-body-sm); line-height: 1.5; color: var(--color-ash); }
 
-  .feat__visual {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-3xl);
-    background: var(--surface-1);
+  .pf__panel { overflow: hidden; }
+  .pf__panel:focus-visible { outline-offset: 4px; }
+  .pf__visual {
     padding: var(--spacing-24);
-    font-size: 14px;
-    font-weight: 400;
-    min-width: 0;
+    background: var(--color-carbon);
+    border-bottom: 1px solid var(--color-iron);
+    min-height: 260px;
+    display: flex; flex-direction: column; gap: 12px; justify-content: center;
+    font-size: 13px; letter-spacing: 0;
   }
+  .pf__visual--mono { font-family: var(--font-mono); font-size: 12px; justify-content: flex-start; }
+  .pf__copy { padding: var(--spacing-24) var(--spacing-24) var(--spacing-32); display: flex; flex-direction: column; gap: 12px; }
+  .pf__copy p { color: var(--color-ash); max-width: 62ch; }
+  .pf__points { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; font-size: var(--text-body-sm); }
+  .pf__points li { display: flex; align-items: center; gap: 10px; }
+  .pf__points :global(svg) { color: var(--color-soft-indigo); flex: none; }
 
-  /* consenso */
-  .consensus { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-  .consensus__node { display: flex; flex-direction: column; gap: 6px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; }
-  .consensus__code { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
-  .consensus__name { font-size: 13px; }
-  .consensus__res { display: inline-flex; gap: 6px; align-items: center; font-family: var(--font-mono); font-size: 12px; color: var(--color-silver-mist); }
-  .consensus__verdict { grid-column: 1 / -1; display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); color: var(--color-silver-mist); }
-  .consensus__verdict :global(svg) { margin-top: 3px; }
-  .consensus__verdict strong { color: var(--color-bone-white); font-weight: 500; }
+  /* Consenso entre regiões */
+  .consensus { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .consensus__node { display: flex; flex-direction: column; gap: 4px; padding: 12px; background: var(--color-graphite); border: 1px solid var(--color-iron); border-radius: 8px; }
+  .consensus__code { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-soft-indigo); }
+  .consensus__name { font-weight: 500; }
+  .consensus__res { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--color-ash); }
+  .verdict { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px dashed var(--color-slate-edge); border-radius: 8px; color: var(--color-ash); }
+  .verdict :global(svg) { margin-top: 3px; }
+  .verdict b { color: var(--color-bone); font-weight: 500; }
 
-  /* canais e escalonamento */
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--spacing-24); }
-  .chips li { padding: 6px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-full); font-size: 13px; }
-  .ladder { display: flex; flex-direction: column; }
-  .ladder li {
-    display: grid; grid-template-columns: 150px 1fr auto; gap: 12px; align-items: baseline;
-    padding: 12px 0; border-top: 1px solid var(--line);
-  }
-  .ladder__after { font-family: var(--font-mono); font-size: 12px; color: var(--color-saffron-spark); }
-  .ladder__how { font-size: 13px; color: var(--color-ash-gray); }
+  /* Canais e escalonamento */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ladder { display: flex; flex-direction: column; border: 1px solid var(--color-iron); border-radius: 8px; overflow: hidden; }
+  .ladder li { display: grid; grid-template-columns: 32px 1fr auto; gap: 12px; align-items: center; padding: 10px 12px; background: var(--color-graphite); }
+  .ladder li + li { border-top: 1px solid var(--color-iron); }
+  .ladder__n { font-family: var(--font-mono); font-size: 11px; color: var(--color-soft-indigo); }
+  .ladder__who { display: flex; flex-direction: column; font-weight: 500; }
+  .ladder__who small { font-weight: 400; font-size: 12px; color: var(--color-ash); }
+  .ladder__after { font-family: var(--font-mono); font-size: 11px; color: var(--color-ash); }
 
-  /* logs */
-  .logs { font-family: var(--font-mono); font-size: 12.5px; }
-  .logs__query { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; }
-  .logs__list li { display: grid; grid-template-columns: auto auto 1fr; gap: 12px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.06); align-items: baseline; }
-  .logs__t { color: #8a8a8a; }
-  .lv { font-size: 11px; font-weight: 600; }
+  /* Logs */
+  .query { padding: 8px 12px; background: var(--color-graphite); border: 1px solid var(--color-iron); border-radius: 8px; overflow-x: auto; white-space: nowrap; }
+  .logs li { display: grid; grid-template-columns: auto 44px 1fr; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--color-iron); }
+  .logs__t { color: var(--color-mist); }
+  .lv { color: var(--color-ash); }
   .lv--err { color: var(--status-down); }
   .lv--warn { color: var(--status-degraded); }
-  .lv--info { color: var(--color-ash-gray); }
-  .logs__foot { margin-top: 12px; color: var(--color-ash-gray); font-size: 12px; }
+  .logs__foot { color: var(--color-ash); font-size: 11px; }
 
-  /* stack trace */
-  .trace__head { display: flex; flex-direction: column; gap: 4px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
-  .trace__type { color: var(--status-down); font-family: var(--font-mono); font-weight: 600; font-size: 13px; }
-  .trace__msg { font-size: 15px; }
-  .trace__meta { font-size: 12px; color: var(--color-ash-gray); }
-  .trace__stack { margin: 14px 0 0; font-size: 12.5px; line-height: 1.75; overflow-x: auto; }
-  .trace__fn { color: var(--color-bone-white); }
-  .trace__line { display: block; color: var(--color-silver-mist); }
-  .trace__line--hit { background: rgba(255, 107, 107, 0.12); color: var(--color-bone-white); }
-  .trace__ln { display: inline-block; width: 3ch; color: #6f6f6f; margin-right: 8px; text-align: right; }
+  /* Stack trace */
+  .trace__head { display: flex; flex-direction: column; gap: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--color-iron); font-family: var(--font-inter); }
+  .trace__type { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; }
+  .trace__msg { font-size: 15px; font-weight: 500; }
+  .trace__meta { font-family: var(--font-mono); font-size: 11px; color: var(--color-ash); }
+  .trace { margin: 0; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+  .trace__fn { color: var(--color-bone); }
+  .trace__line { display: block; color: var(--color-ash); }
+  .trace__line--hit { background: var(--color-iron); color: var(--color-bone); box-shadow: inset 2px 0 0 var(--color-soft-indigo); }
+  .trace__ln { display: inline-block; width: 3ch; margin-right: 8px; text-align: right; color: var(--color-mist); }
 
-  /* status page */
-  .sp { display: flex; flex-direction: column; gap: 14px; }
-  .sp__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .sp__brand { font-weight: 500; }
-  .sp__static { font-family: var(--font-mono); font-size: 12px; color: var(--color-ash-gray); }
-  .sp__banner { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 14px; border: 1px solid rgba(255,184,41,0.4); background: rgba(255,184,41,0.07); }
-  .sp__banner :global(svg) { margin-top: 2px; }
-  .sp__banner strong { display: block; font-weight: 500; }
-  .sp__banner span { font-size: 13px; color: var(--color-silver-mist); }
-  .sp__list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+  /* Status page */
+  .sp__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .sp__brand { font-weight: 500; font-size: 14px; }
+  .sp__banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px; background: var(--color-graphite); border: 1px solid var(--color-slate-edge); border-radius: 8px; }
+  .sp__banner :global(svg) { margin-top: 3px; }
+  .sp__banner b { display: block; font-weight: 500; }
+  .sp__banner span { color: var(--color-ash); font-size: 12.5px; }
+  .sp__list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--color-iron); }
 
   @media (max-width: 960px) {
-    .feat { grid-template-columns: 1fr; }
-    .feat--rev .feat__copy { order: 0; }
+    .pf { grid-template-columns: 1fr; }
+    .pf__tabs { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; scrollbar-width: none; }
+    .pf__tab { flex: none; width: auto; padding: 10px 14px; align-items: center; }
+    .pf__tab-summary { display: none; }
+    .pf__tab-title { font-size: var(--text-body-sm); white-space: nowrap; }
   }
   @media (max-width: 560px) {
     .consensus { grid-template-columns: 1fr; }
-    .ladder li { grid-template-columns: 1fr; gap: 2px; }
-    .logs__list li { grid-template-columns: auto 1fr; }
+    .logs li { grid-template-columns: 44px 1fr; }
     .logs__t { grid-column: 1 / -1; }
   }
 </style>

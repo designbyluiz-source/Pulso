@@ -1,0 +1,23 @@
+---
+/**
+ * Marcador da linha do tempo de incidente.
+ * Formas de status (octógono/círculo) só para estados do serviço;
+ * ações humanas e do sistema usam ícones neutros, para não confundir com "Lento".
+ */
+import StatusIcon from './StatusIcon.astro';
+import Icon from './Icon.astro';
+
+type Kind = 'detect' | 'confirm' | 'alert' | 'ack' | 'resolve';
+interface Props { kind: Kind; size?: number; }
+const { kind, size = 14 } = Astro.props;
+---
+{(kind === 'detect' || kind === 'confirm') && <StatusIcon status="down" size={size} />}
+{kind === 'resolve' && <StatusIcon status="up" size={size} />}
+{kind === 'alert' && <Icon name="bell" size={size + 2} class="tm tm--alert" />}
+{kind === 'ack' && <Icon name="eye" size={size + 2} class="tm tm--ack" />}
+
+<style>
+  /* :global porque a classe vai para o <svg> do componente Icon */
+  :global(.tm--alert) { color: var(--color-soft-indigo); }
+  :global(.tm--ack) { color: var(--color-ash); }
+</style>

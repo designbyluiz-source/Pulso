@@ -1,28 +1,21 @@
 ---
 ---
-<section class="section final" aria-labelledby="final-title">
+<section class="final grid-bg" aria-labelledby="final-title">
   <div class="container final__inner">
-    <h2 id="final-title" class="t-display final__title">Cole uma URL. O primeiro alerta chega antes do café esfriar.</h2>
-    <div class="final__actions">
-      <a href="/cadastro" class="final__cta">Criar conta grátis</a>
-      <a href="/docs/inicio-rapido" class="final__ghost">Ler o início rápido</a>
+    <h2 id="final-title" class="t-display final__title">Pare de descobrir pela reclamação do cliente.</h2>
+    <p class="final__lead">Cole uma URL e receba o primeiro alerta em menos de dois minutos. 10 monitores grátis, sem cartão.</p>
+    <div class="btn-group final__actions">
+      <a href="/cadastro" class="btn btn--primary">Começar grátis</a>
+      <a href="/docs/inicio-rapido" class="btn btn--ghost">Ler o início rápido</a>
     </div>
-    <p class="t-muted final__note">10 monitores grátis para sempre, sem cartão de crédito.</p>
   </div>
 </section>
 
 <style>
-  .final { border-top: 1px solid var(--line); }
-  .final__inner { display: flex; flex-direction: column; gap: var(--spacing-36); }
-  .final__title { max-width: 16ch; font-size: clamp(44px, 6.6vw, 96px); }
-  .final__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-24); }
-  .final__cta {
-    display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px;
-    border-radius: var(--radius-3xl); background: var(--color-electric-iris);
-    font-size: 16px; font-weight: 500; transition: background-color 0.15s ease;
-  }
-  .final__cta:hover { background: #6d3df5; }
-  .final__ghost { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 400; text-underline-offset: 6px; }
-  .final__ghost:hover { text-decoration: underline; color: var(--color-saffron-spark); }
-  .final__note { font-size: 15px; font-weight: 400; }
+  .final { padding-block: clamp(96px, 14vw, 200px); border-top: 1px solid var(--color-iron); }
+  .final::before { mask-image: radial-gradient(ellipse 60% 70% at 50% 50%, #000 30%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 50%, #000 30%, transparent 100%); }
+  .final__inner { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--spacing-24); }
+  .final__title { max-width: 16ch; }
+  .final__lead { max-width: 520px; color: var(--color-ash); }
+  .final__actions { justify-content: center; margin-top: var(--spacing-8); }
 </style>

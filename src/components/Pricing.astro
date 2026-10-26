@@ -1,39 +1,36 @@
 ---
+import Icon from './ui/Icon.astro';
 import { plans } from '../data/content';
 ---
-<section id="precos" class="section pricing" aria-labelledby="pricing-title">
+<section id="precos" class="section pricing grid-bg" aria-labelledby="pricing-title">
   <div class="container">
-    <div class="pricing__head">
-      <h2 id="pricing-title" class="t-heading-lg">Comece grátis. Pague quando o produto crescer.</h2>
-      <p class="t-lead">Preços em reais, cobrança mensal, cancelamento a qualquer momento pelo painel.</p>
+    <div class="section-head">
+      <p class="t-eyebrow">Preços</p>
+      <h2 id="pricing-title" class="t-display-sm">Comece grátis. Pague quando o produto crescer.</h2>
+      <p>Preços em reais, cobrança mensal e cancelamento a qualquer momento pelo painel.</p>
     </div>
 
     <ul class="plans">
       {plans.map((p) => (
-        <li class:list={['plan', { 'plan--featured': p.featured }]}>
-          <div class="plan__top">
-            <h3 class="plan__name">
-              {p.name}
-              {p.featured && <span class="plan__tag">Mais escolhido</span>}
-            </h3>
-            <p class="plan__summary">{p.summary}</p>
+        <li class:list={['plan card', { 'plan--featured': p.featured }]}>
+          <div class="plan__head">
+            <h3 class="plan__name">{p.name}</h3>
+            {p.featured && <span class="tag tag--accent">Mais escolhido</span>}
           </div>
+          <p class="plan__summary">{p.summary}</p>
           <p class="plan__price">
             <span class="plan__amount">{p.price}</span>
             <span class="plan__period">{p.period}</span>
           </p>
           <a
             href={`/cadastro?plano=${p.name.toLowerCase()}`}
-            class:list={['plan__cta', p.featured ? 'plan__cta--primary' : 'plan__cta--outline']}
+            class:list={['btn plan__cta', p.featured ? 'btn--primary' : 'btn--ghost']}
           >
             {p.cta}
           </a>
           <ul class="plan__features" aria-label={`Inclui no plano ${p.name}`}>
             {p.features.map((f) => (
-              <li>
-                <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                <span>{f}</span>
-              </li>
+              <li><Icon name="check" size={16} /><span>{f}</span></li>
             ))}
           </ul>
         </li>
@@ -43,45 +40,27 @@ import { plans } from '../data/content';
 </section>
 
 <style>
-  .pricing__head {
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    gap: clamp(24px, 4vw, 60px);
-    align-items: end;
-    margin-bottom: var(--spacing-60);
+  .plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-16); align-items: stretch; }
+  .plan { display: flex; flex-direction: column; gap: var(--spacing-16); padding: var(--spacing-32) var(--card-padding); }
+  .plan--featured { background: var(--color-iron); border-color: var(--color-smoke); }
+  .plan__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 26px; }
+  .plan__name { font-size: var(--text-heading-sm); letter-spacing: -0.012em; }
+  .tag--accent { color: var(--color-soft-indigo); background: rgba(103, 152, 255, 0.12); }
+  .plan__summary { font-size: var(--text-body-sm); color: var(--color-ash); min-height: 44px; }
+  .plan__price { display: flex; align-items: baseline; gap: 6px; padding-top: var(--spacing-8); }
+  .plan__amount { font-size: var(--text-heading-lg); font-weight: 500; letter-spacing: -0.025em; line-height: 1; }
+  .plan__period { font-size: var(--text-body-sm); color: var(--color-ash); }
+  .plan__cta { width: 100%; margin-top: var(--spacing-8); }
+  .plan__features {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-top: var(--spacing-8); padding-top: var(--spacing-24); border-top: 1px solid var(--color-slate-edge);
+    font-size: var(--text-body-sm);
   }
-  .plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-18); }
-  .plan {
-    display: flex; flex-direction: column; gap: var(--spacing-24);
-    padding: clamp(24px, 3vw, 36px);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-3xl);
-  }
-  .plan--featured { border-color: var(--color-electric-iris); background: rgba(128, 82, 255, 0.06); }
-  .plan__top { display: flex; flex-direction: column; gap: 8px; min-height: 96px; }
-  .plan__name { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: var(--text-heading-2xs); letter-spacing: -0.02em; }
-  .plan__tag { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: var(--radius-full); background: var(--color-saffron-spark); color: #000; letter-spacing: 0; }
-  .plan__summary { color: var(--color-silver-mist); font-size: 16px; }
-  .plan__price { display: flex; align-items: baseline; gap: 10px; }
-  .plan__amount { font-size: clamp(44px, 4.4vw, 60px); font-weight: 400; letter-spacing: -0.04em; line-height: 1; }
-  .plan__period { color: var(--color-ash-gray); font-size: 15px; font-weight: 400; }
-  .plan__cta {
-    display: inline-flex; justify-content: center; align-items: center;
-    min-height: 48px; padding: 0 22px; border-radius: var(--radius-3xl);
-    font-size: 15px; font-weight: 500;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
-  }
-  .plan__cta--primary { background: var(--color-electric-iris); }
-  .plan__cta--primary:hover { background: #6d3df5; }
-  .plan__cta--outline { border: 1px solid var(--line-strong); }
-  .plan__cta--outline:hover { border-color: var(--color-bone-white); }
-  .plan__features { display: flex; flex-direction: column; gap: 12px; padding-top: var(--spacing-24); border-top: 1px solid var(--line); font-size: 16px; font-weight: 300; }
   .plan__features li { display: flex; gap: 10px; align-items: flex-start; }
-  .plan__features svg { color: var(--status-up); margin-top: 4px; flex: none; }
+  .plan__features :global(svg) { color: var(--color-soft-indigo); flex: none; margin-top: 2px; }
 
-  @media (max-width: 1000px) {
-    .plans { grid-template-columns: 1fr; max-width: 560px; }
-    .plan__top { min-height: 0; }
-    .pricing__head { grid-template-columns: 1fr; }
+  @media (max-width: 960px) {
+    .plans { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
+    .plan__summary { min-height: 0; }
   }
 </style>

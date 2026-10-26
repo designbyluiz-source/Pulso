@@ -1,33 +1,32 @@
 ---
 import StatusIcon, { type Status } from './StatusIcon.astro';
-interface Props { status: Status; label?: string; compact?: boolean; }
+interface Props { status: Status; label?: string; }
 const labels: Record<Status, string> = {
   up: 'Operacional',
   degraded: 'Lento',
   down: 'Fora do ar',
 };
-const { status, label = labels[status], compact = false } = Astro.props;
+const { status, label = labels[status] } = Astro.props;
 ---
-<span class:list={['badge', `badge--${status}`, { 'badge--compact': compact }]}>
-  <StatusIcon status={status} size={compact ? 12 : 14} />
+<span class="badge">
+  <StatusIcon status={status} size={12} />
   <span>{label}</span>
 </span>
 
 <style>
+  /* Cor só no ícone; o texto fica no tom neutro do sistema */
   .badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 10px 4px 8px;
-    border-radius: var(--radius-full);
-    font-size: 13px;
+    padding: 3px 8px 3px 6px;
+    border-radius: var(--radius-tags);
+    background: var(--color-iron);
+    font-size: 12px;
     font-weight: 500;
-    line-height: 1.2;
+    line-height: 1.4;
+    letter-spacing: 0;
+    color: var(--color-bone);
     white-space: nowrap;
-    border: 1px solid currentColor;
   }
-  .badge--compact { padding: 2px 8px 2px 6px; font-size: 12px; }
-  .badge--up { color: var(--status-up); background: rgba(62, 207, 142, 0.08); }
-  .badge--degraded { color: var(--status-degraded); background: rgba(255, 184, 41, 0.08); }
-  .badge--down { color: var(--status-down); background: rgba(255, 107, 107, 0.08); }
 </style>

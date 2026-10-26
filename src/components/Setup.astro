@@ -1,81 +1,80 @@
 ---
 import { setupSteps } from '../data/content';
 ---
-<section class="section setup" aria-labelledby="setup-title">
+<section class="section setup grid-bg" aria-labelledby="setup-title">
   <div class="container">
-    <div class="setup__head">
-      <h2 id="setup-title" class="t-heading-lg">Do cadastro ao primeiro alerta em menos de dois minutos.</h2>
-      <p class="t-lead">Sem agente para instalar e sem YAML. Você cola um endereço e o Pulso começa a checar de três continentes.</p>
+    <div class="section-head">
+      <p class="t-eyebrow">Como funciona</p>
+      <h2 id="setup-title" class="t-display-sm">Do cadastro ao primeiro alerta em menos de dois minutos.</h2>
+      <p>Sem agente para instalar e sem arquivo de configuração. Você cola um endereço e o Pulso começa a checar de três continentes.</p>
     </div>
 
     <ol class="steps">
       {setupSteps.map((s, i) => (
-        <li class="step">
-          <span class="step__n" aria-hidden="true">{i + 1}</span>
-          <h3 class="t-heading-2xs">{s.title}</h3>
-          <p>{s.text}</p>
+        <li class="step card">
+          <span class="step__n">{String(i + 1).padStart(2, '0')}</span>
+          <h3 class="t-heading-sm">{s.title}</h3>
+          <p class="t-body-sm">{s.text}</p>
+
+          <div class="step__ui">
+            {i === 0 && (
+              <form class="url-form" action="/cadastro" method="get">
+                <label for="setup-url" class="visually-hidden">URL para monitorar</label>
+                <input id="setup-url" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://api.seuapp.com.br" required />
+                <button type="submit" class="btn btn--primary">Monitorar</button>
+              </form>
+            )}
+            {i === 1 && (
+              <ul class="toggles" aria-hidden="true">
+                <li><span>E-mail</span><span class="sw is-on"></span></li>
+                <li><span>Slack #plantao</span><span class="sw is-on"></span></li>
+                <li><span>WhatsApp</span><span class="sw"></span></li>
+              </ul>
+            )}
+            {i === 2 && (
+              <div class="toast" aria-hidden="true">
+                <span class="toast__app">Slack</span>
+                <p><b>Pulso</b> Alerta de teste: api.seuapp.com.br respondeu 200 em 3 regiões.</p>
+                <span class="toast__time">entregue em 1,8 s</span>
+              </div>
+            )}
+          </div>
         </li>
       ))}
     </ol>
-
-    <div class="setup__demo" aria-hidden="true">
-      <div class="field">
-        <span class="field__label">URL</span>
-        <span class="field__value">https://api.loja.com.br/health</span>
-      </div>
-      <div class="field">
-        <span class="field__label">Avisar em</span>
-        <span class="field__chips"><span>E-mail</span><span>Slack #plantao</span></span>
-      </div>
-      <div class="toast">
-        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#3ecf8e" /><path d="M4.8 8.2l2.1 2.1 4.3-4.6" stroke="#000" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        Alerta de teste entregue no Slack em 1,8 s
-      </div>
-    </div>
   </div>
 </section>
 
 <style>
-  .setup__head {
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    gap: clamp(24px, 4vw, 60px);
-    align-items: end;
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-16); }
+  .step { display: flex; flex-direction: column; gap: 10px; padding: var(--card-padding); }
+  .step__n { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--color-soft-indigo); margin-bottom: 8px; }
+  .step__ui {
+    margin-top: auto; padding-top: var(--spacing-24);
+    display: flex; flex-direction: column; justify-content: flex-end; min-height: 128px;
   }
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--spacing-36);
-    margin-top: var(--spacing-60);
-    counter-reset: step;
-  }
-  .step { display: flex; flex-direction: column; gap: var(--spacing-12); padding-top: var(--spacing-24); border-top: 1px solid var(--line-strong); }
-  .step__n { font-size: var(--text-heading-sm); letter-spacing: -0.04em; line-height: 1; color: var(--color-electric-iris); }
-  .step p { color: var(--color-silver-mist); max-width: 38ch; }
 
-  .setup__demo {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--spacing-12);
-    margin-top: var(--spacing-60);
-    padding: var(--spacing-18);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-3xl);
-    background: var(--surface-1);
-    font-size: 14px;
-    font-weight: 400;
+  .url-form { display: flex; flex-direction: column; gap: 8px; }
+  .url-form input {
+    min-height: 44px; padding: 0 12px;
+    background: var(--color-carbon); border: 1px solid var(--color-slate-edge); border-radius: var(--radius-inputs);
+    font-family: var(--font-mono); font-size: 13px; letter-spacing: 0;
   }
-  .field { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
-  .field:first-child { flex: 1 1 320px; }
-  .field__label { color: var(--color-ash-gray); font-size: 12px; }
-  .field__value { font-family: var(--font-mono); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .field__chips { display: flex; gap: 6px; flex-wrap: wrap; }
-  .field__chips span { padding: 3px 10px; border-radius: var(--radius-full); background: var(--surface-2); font-size: 13px; }
-  .toast { display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: rgba(62, 207, 142, 0.1); color: var(--status-up); }
+  .url-form input::placeholder { color: var(--color-mist); }
+  .url-form input:focus-visible { outline: none; border-color: var(--color-soft-indigo); }
 
-  @media (max-width: 860px) {
-    .setup__head, .steps { grid-template-columns: 1fr; }
-    .steps { gap: var(--spacing-30); }
-  }
+  .toggles { display: flex; flex-direction: column; border: 1px solid var(--color-iron); border-radius: 8px; background: var(--color-carbon); }
+  .toggles li { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; font-size: 13px; }
+  .toggles li + li { border-top: 1px solid var(--color-iron); }
+  .sw { width: 28px; height: 16px; border-radius: 99px; background: var(--color-slate-edge); position: relative; }
+  .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--color-mist); }
+  .sw.is-on { background: var(--color-soft-indigo); }
+  .sw.is-on::after { left: 14px; background: var(--color-bone); }
+
+  .toast { padding: 12px; border: 1px solid var(--color-iron); border-radius: 8px; background: var(--color-carbon); font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+  .toast__app { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ash); }
+  .toast b { font-weight: 600; margin-right: 6px; }
+  .toast__time { font-family: var(--font-mono); font-size: 11px; color: var(--color-soft-indigo); }
+
+  @media (max-width: 900px) { .steps { grid-template-columns: 1fr; } }
 </style>

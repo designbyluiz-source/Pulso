@@ -1,195 +1,54 @@
 ---
-import StatusIcon from './ui/StatusIcon.astro';
-import { regions } from '../data/content';
-
-const probes = [
-  { ...regions[0], result: 'HTTP 503 em 412 ms' },
-  { ...regions[1], result: 'HTTP 503 em 538 ms' },
-  { ...regions[2], result: 'HTTP 503 em 601 ms' },
-];
+import Dashboard from './Dashboard.astro';
+import Icon from './ui/Icon.astro';
 ---
-<section class="hero" aria-labelledby="hero-title">
-  <div class="container hero__grid">
-    <div class="hero__copy">
-      <p class="t-label">Monitoramento e observabilidade para desenvolvedores</p>
-      <h1 id="hero-title" class="t-display hero__title">Saiba que caiu antes do seu cliente.</h1>
-      <p class="t-lead hero__lead">
-        O Pulso checa seus endpoints a partir de São Paulo, dos Estados Unidos e da Europa, confirma a queda
-        entre as regiões e avisa o plantão certo. Logs, erros e página de status no mesmo lugar.
-      </p>
-
-      <form class="hero__form" action="/cadastro" method="get">
-        <label for="hero-url" class="hero__form-label">URL para monitorar</label>
-        <div class="hero__form-row">
-          <input
-            id="hero-url"
-            name="url"
-            type="url"
-            inputmode="url"
-            autocomplete="url"
-            placeholder="https://api.seuapp.com.br/health"
-            required
-            aria-describedby="hero-url-hint"
-          />
-          <button type="submit">Monitorar grátis</button>
-        </div>
-        <p id="hero-url-hint" class="hero__hint">
-          10 monitores grátis, sem cartão. Do cadastro ao primeiro alerta em menos de 2 minutos.
-        </p>
-      </form>
+<section class="hero grid-bg" aria-labelledby="hero-title">
+  <div class="container hero__inner">
+    <p class="t-eyebrow">Monitoramento e observabilidade para desenvolvedores</p>
+    <h1 id="hero-title" class="t-display hero__title">Saiba que caiu antes do seu cliente.</h1>
+    <p class="hero__lead">
+      O Pulso checa seus endpoints de São Paulo, dos Estados Unidos e da Europa, confirma a queda entre as
+      regiões e avisa o plantão certo. Logs, erros e página de status no mesmo painel.
+    </p>
+    <div class="btn-group hero__actions">
+      <a href="/cadastro" class="btn btn--primary">Começar grátis</a>
+      <a href="#docs" class="btn btn--ghost">Ver a documentação</a>
     </div>
+    <ul class="hero__facts">
+      <li><Icon name="check" size={14} /> 10 monitores grátis</li>
+      <li><Icon name="check" size={14} /> Sem cartão de crédito</li>
+      <li><Icon name="check" size={14} /> Primeiro alerta em menos de 2 minutos</li>
+    </ul>
+  </div>
 
-    <figure class="probe" aria-labelledby="probe-caption">
-      <figcaption id="probe-caption" class="probe__head">
-        <span class="probe__target">hooks.loja.com.br</span>
-        <span class="t-muted">checagem a cada 30 s</span>
-      </figcaption>
-      <ol class="probe__list">
-        {probes.map((p, i) => (
-          <li class="probe__row" style={`--i:${i}`}>
-            <span class="probe__region">
-              <span class="probe__code" style={`color:${p.color}`}>{p.short}</span>
-              <span>{p.name}</span>
-            </span>
-            <span class="probe__result">
-              <StatusIcon status="down" size={14} />
-              <span>{p.result}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
-      <div class="probe__verdict" style="--i:3">
-        <StatusIcon status="down" size={18} />
-        <div>
-          <strong>Queda confirmada por 3 de 3 regiões</strong>
-          <span>Alerta enviado para o plantão em 25 s</span>
-        </div>
-      </div>
-    </figure>
+  <div id="produto" class="container hero__product">
+    <Dashboard />
   </div>
 </section>
 
 <style>
-  .hero { padding-block: clamp(48px, 9vw, 120px) var(--section-gap); }
-  .hero__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    gap: clamp(36px, 5vw, 96px);
-    align-items: end;
-  }
-  .hero__copy { display: flex; flex-direction: column; gap: var(--spacing-24); }
-  .hero__title { max-width: 11ch; }
-  .hero__lead { margin-top: var(--spacing-6); }
-
-  .hero__form { display: flex; flex-direction: column; gap: 10px; margin-top: var(--spacing-12); max-width: 620px; }
-  .hero__form-label { font-size: var(--text-nav-label); font-weight: 500; color: var(--color-silver-mist); }
-  .hero__form-row {
+  .hero { padding-top: clamp(56px, 9vw, 112px); padding-bottom: var(--spacing-64); }
+  .hero__inner {
     display: flex;
-    gap: 8px;
-    padding: 6px;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-3xl);
-    background: var(--surface-1);
-    transition: border-color 0.15s ease;
-  }
-  .hero__form-row:focus-within { border-color: var(--color-electric-iris); }
-  .hero__form-row input {
-    flex: 1;
-    min-width: 0;
-    min-height: 46px;
-    padding: 0 14px;
-    background: none;
-    border: 0;
-    font-family: var(--font-mono);
-    font-size: 15px;
-    font-weight: 400;
-  }
-  .hero__form-row input::placeholder { color: #8a8a8a; }
-  .hero__form-row input:focus-visible { outline: none; }
-  .hero__form-row button {
-    min-height: 46px;
-    padding: 0 22px;
-    border: 0;
-    border-radius: var(--radius-3xl);
-    background: var(--color-electric-iris);
-    color: var(--color-bone-white);
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .hero__form-row button:hover { background: #6d3df5; }
-  .hero__hint { font-size: var(--text-nav-label); color: var(--color-ash-gray); font-weight: 400; }
-
-  /* Sequência de confirmação: único momento animado da página */
-  .probe {
-    margin: 0;
-    padding: var(--spacing-24);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-3xl);
-    background: var(--surface-1);
-    font-size: var(--text-base);
-    font-weight: 400;
-  }
-  .probe__head {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding-bottom: var(--spacing-18);
-    border-bottom: 1px solid var(--line);
-    font-size: 13px;
-  }
-  .probe__target { font-family: var(--font-mono); }
-  .probe__list { display: flex; flex-direction: column; }
-  .probe__row {
-    display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--line);
+    text-align: center;
+    gap: var(--spacing-24);
   }
-  .probe__region { display: inline-flex; gap: 12px; align-items: baseline; }
-  .probe__code { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
-  .probe__result {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--status-down);
-  }
-  .probe__verdict {
+  .hero__title { max-width: 20ch; }
+  .hero__lead { max-width: 560px; color: var(--color-ash); font-size: 18px; line-height: 1.5; }
+  .hero__actions { justify-content: center; margin-top: var(--spacing-8); }
+  .hero__facts {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    margin-top: var(--spacing-18);
-    padding: 14px 16px;
-    border-radius: var(--radius-md);
-    background: rgba(255, 107, 107, 0.08);
-    border: 1px solid rgba(255, 107, 107, 0.35);
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 24px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: var(--color-ash);
   }
-  .probe__verdict :global(svg) { margin-top: 2px; }
-  .probe__verdict strong { display: block; font-weight: 500; }
-  .probe__verdict span { font-size: 13px; color: var(--color-silver-mist); }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .probe__row, .probe__verdict {
-      opacity: 0;
-      transform: translateY(6px);
-      animation: probe-in 0.45s ease-out forwards;
-      animation-delay: calc(0.5s + var(--i) * 0.6s);
-    }
-    @keyframes probe-in { to { opacity: 1; transform: none; } }
-  }
-
-  @media (max-width: 960px) {
-    .hero__grid { grid-template-columns: 1fr; align-items: start; }
-  }
-  @media (max-width: 520px) {
-    .hero__form-row { flex-direction: column; border-radius: 18px; }
-    .hero__form-row button { width: 100%; }
-  }
+  .hero__facts li { display: inline-flex; align-items: center; gap: 6px; }
+  .hero__facts :global(svg) { color: var(--color-soft-indigo); }
+  .hero__product { margin-top: var(--spacing-64); }
 </style>
